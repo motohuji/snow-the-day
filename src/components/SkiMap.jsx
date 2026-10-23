@@ -4,41 +4,46 @@ import 'leaflet/dist/leaflet.css';
 import { MapPin, Layers } from 'lucide-react';
 
 /**
- * 完全無料・APIキー不要のタイルレイヤー定義
- * (CartoDBの有料化・APIキーウォーターマークを回避)
+ * 完全無料・APIキー不要・高速かつ安定したタイルレイヤー定義
+ * maxNativeZoom を指定することで、高ズーム時でもタイルが消えず拡大表示される
  */
 const TILE_PROVIDERS = {
   dark: {
+    name: 'ダーク',
     url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    maxZoom: 19
+    maxNativeZoom: 19,
+    maxZoom: 18
   },
   terrain: {
-    url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-    attribution: 'Map: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>)',
-    subdomains: 'abc',
-    maxZoom: 17
+    name: '地形・山岳',
+    url: 'https://cyberjapandata.gsi.go.jp/xyz/relief/{z}/{x}/{y}.png',
+    attribution: '&copy; <a href="https://maps.gsi.go.jp/development/ichiran.html">国土地理院</a> (色別標高図)',
+    maxNativeZoom: 15,
+    maxZoom: 18
   },
   photo: {
+    name: '航空写真',
     url: 'https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg',
     attribution: '&copy; <a href="https://maps.gsi.go.jp/development/ichiran.html">国土地理院</a> (航空写真)',
+    maxNativeZoom: 18,
     maxZoom: 18
   },
   osm: {
+    name: '標準',
     url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    maxZoom: 19
+    maxNativeZoom: 19,
+    maxZoom: 18
   }
 };
 
 /**
  * ゲレンデマップコンポーネント
- * 完全無料・APIキー不要・商用/個人利用フリー
  */
 export const SkiMap = ({ resortsData = [], onSelectResort }) => {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
-  const tileLayerRef = useRef(null);
   const markersLayerRef = useRef(null);
   const [mapType, setMapType] = useState('dark'); // 'dark' | 'terrain' | 'photo' | 'osm'
 
@@ -166,11 +171,10 @@ export const SkiMap = ({ resortsData = [], onSelectResort }) => {
     });
   }, [onSelectResort]);
 
-  // 地図の初期化 (コンポーネントマウント時)
+  // 地図の初期化 (初回マウント時のみ実行)
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
-    // 既存インスタンス破棄
     if (mapInstanceRef.current) {
       mapInstanceRef.current.remove();
       mapInstanceRef.current = null;
@@ -186,15 +190,6 @@ export const SkiMap = ({ resortsData = [], onSelectResort }) => {
 
     mapInstanceRef.current = map;
 
-    // タイルレイヤー適用
-    const tileConf = TILE_PROVIDERS[mapType] || TILE_PROVIDERS.dark;
-    const tileLayer = L.tileLayer(tileConf.url, {
-      attribution: tileConf.attribution,
-      subdomains: tileConf.subdomains || 'abc',
-      maxZoom: tileConf.maxZoom
-    }).addTo(map);
-    tileLayerRef.current = tileLayer;
-
     // マーカーレイヤー作成
     const markersLayer = L.layerGroup().addTo(map);
     markersLayerRef.current = markersLayer;
@@ -202,7 +197,7 @@ export const SkiMap = ({ resortsData = [], onSelectResort }) => {
     // 初回マーカー描画
     renderMarkers(map, markersLayer, resortsData);
 
-    // サイズ再計算 (マウント時とリサイズ時の描画乱れ防止)
+    // サイズ再計算
     const timer = setTimeout(() => {
       map.invalidateSize();
     }, 150);
@@ -226,10 +221,34 @@ export const SkiMap = ({ resortsData = [], onSelectResort }) => {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
         markersLayerRef.current = null;
-        tileLayerRef.current = null;
       }
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // タイル切り替えの宣言的同期 (mapType変更時に自動更新)
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    // 既存のタイルレイヤーをすべて安全に削除
+    map.eachLayer((layer) => {
+      if (layer instanceof L.TileLayer) {
+        map.removeLayer(layer);
+      }
+    });
+
+    const tileConf = TILE_PROVIDERS[mapType] || TILE_PROVIDERS.dark;
+    const newLayer = L.tileLayer(tileConf.url, {
+      attribution: tileConf.attribution,
+      subdomains: tileConf.subdomains || 'abc',
+      maxNativeZoom: tileConf.maxNativeZoom || 18,
+      maxZoom: 18,
+      minZoom: 4
+    }).addTo(map);
+
+    // タイル pane の再計算
+    map.invalidateSize();
+  }, [mapType]);
 
   // resortsData 更新時にマーカー再描画
   useEffect(() => {
@@ -237,21 +256,6 @@ export const SkiMap = ({ resortsData = [], onSelectResort }) => {
       renderMarkers(mapInstanceRef.current, markersLayerRef.current, resortsData);
     }
   }, [resortsData, renderMarkers]);
-
-  // タイル切り替えハンドラ
-  const handleMapTypeChange = (newType) => {
-    setMapType(newType);
-    if (mapInstanceRef.current && tileLayerRef.current) {
-      mapInstanceRef.current.removeLayer(tileLayerRef.current);
-      const tileConf = TILE_PROVIDERS[newType] || TILE_PROVIDERS.dark;
-      const newLayer = L.tileLayer(tileConf.url, {
-        attribution: tileConf.attribution,
-        subdomains: tileConf.subdomains || 'abc',
-        maxZoom: tileConf.maxZoom
-      }).addTo(mapInstanceRef.current);
-      tileLayerRef.current = newLayer;
-    }
-  };
 
   return (
     <div className="relative w-full rounded-3xl overflow-hidden border border-slate-800 bg-slate-900 shadow-2xl isolate">
@@ -271,7 +275,7 @@ export const SkiMap = ({ resortsData = [], onSelectResort }) => {
         <div className="flex items-center gap-1.5 bg-slate-900 p-1 rounded-xl border border-slate-800">
           <Layers className="w-3.5 h-3.5 text-slate-400 ml-1.5 mr-0.5" />
           <button
-            onClick={() => handleMapTypeChange('dark')}
+            onClick={() => setMapType('dark')}
             className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
               mapType === 'dark' ? 'bg-sky-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-white'
             }`}
@@ -279,7 +283,7 @@ export const SkiMap = ({ resortsData = [], onSelectResort }) => {
             ダーク
           </button>
           <button
-            onClick={() => handleMapTypeChange('terrain')}
+            onClick={() => setMapType('terrain')}
             className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
               mapType === 'terrain' ? 'bg-sky-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-white'
             }`}
@@ -287,7 +291,7 @@ export const SkiMap = ({ resortsData = [], onSelectResort }) => {
             地形・山岳
           </button>
           <button
-            onClick={() => handleMapTypeChange('photo')}
+            onClick={() => setMapType('photo')}
             className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
               mapType === 'photo' ? 'bg-sky-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-white'
             }`}
@@ -295,7 +299,7 @@ export const SkiMap = ({ resortsData = [], onSelectResort }) => {
             航空写真
           </button>
           <button
-            onClick={() => handleMapTypeChange('osm')}
+            onClick={() => setMapType('osm')}
             className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
               mapType === 'osm' ? 'bg-sky-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-white'
             }`}

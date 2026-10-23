@@ -392,19 +392,23 @@
       const tiles = {
         dark: {
           url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-          attr: '&copy; OpenStreetMap contributors'
+          attr: '&copy; OpenStreetMap contributors',
+          maxNativeZoom: 19
         },
         terrain: {
-          url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-          attr: 'Map: &copy; OpenTopoMap (&copy; OpenStreetMap)'
+          url: 'https://cyberjapandata.gsi.go.jp/xyz/relief/{z}/{x}/{y}.png',
+          attr: '&copy; 国土地理院 (色別標高図)',
+          maxNativeZoom: 15
         },
         photo: {
           url: 'https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg',
-          attr: '&copy; 国土地理院 (航空写真)'
+          attr: '&copy; 国土地理院 (航空写真)',
+          maxNativeZoom: 18
         },
         osm: {
           url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-          attr: '&copy; OpenStreetMap contributors'
+          attr: '&copy; OpenStreetMap contributors',
+          maxNativeZoom: 19
         }
       };
 
@@ -420,10 +424,11 @@
           });
           mapRef.current = map;
 
-          L.tileLayer(tiles[tileStyle].url, {
-            attribution: tiles[tileStyle].attr,
-            subdomains: 'abcd',
-            maxZoom: 19
+          const initTile = tiles[tileStyle] || tiles.dark;
+          L.tileLayer(initTile.url, {
+            attribution: initTile.attr,
+            maxNativeZoom: initTile.maxNativeZoom || 18,
+            maxZoom: 18
           }).addTo(map);
 
           layerGroupRef.current = L.layerGroup().addTo(map);
@@ -444,11 +449,13 @@
           mapRef.current.eachLayer(l => {
             if (l instanceof L.TileLayer) mapRef.current.removeLayer(l);
           });
-          L.tileLayer(tiles[s].url, {
-            attribution: tiles[s].attr,
-            subdomains: 'abcd',
-            maxZoom: 19
+          const target = tiles[s] || tiles.dark;
+          L.tileLayer(target.url, {
+            attribution: target.attr,
+            maxNativeZoom: target.maxNativeZoom || 18,
+            maxZoom: 18
           }).addTo(mapRef.current);
+          mapRef.current.invalidateSize();
         }
       };
 
