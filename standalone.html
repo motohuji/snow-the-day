@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SNOW THE DAY - スキー場スコア＆コンディション予測</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Outfit & Noto Sans JP -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <!-- React & Babel CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Leaflet (完全フリー地図ライブラリ / APIキー一切不要) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            outfit: ['Outfit', 'sans-serif'],
+            sans: ['Noto Sans JP', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
+    ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.3); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(56, 189, 248, 0.6); }
+    .custom-ski-pin { background: transparent; border: none; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen selection:bg-sky-500 selection:text-white font-sans antialiased">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useMemo, useRef } = React;
+
+    // --- スキー場マスターデータ ---
+    const REGIONS = [
+      { id: 'all', name: '全エリア' },
+      { id: 'hokkaido', name: '北海道' },
+      { id: 'nagano', name: '長野' },
+      { id: 'niigata', name: '新潟' },
+      { id: 'gunma', name: '群馬' },
+      { id: 'fukushima', name: '福島' },
+      { id: 'miyagi', name: '宮城' },
+      { id: 'shizuoka', name: '静岡' }
+    ];
+
+    const RESORTS = [
+      // 北海道
+      { id: 'niseko', name: 'ニセコ東急 グラン・ヒラフ', region: 'hokkaido', prefecture: '北海道', areaName: '倶知安町 / ニセコ', lat: 42.8617, lng: 140.7011, topElevation: 1200, baseElevation: 260, tag: '極上パウダースノー' },
+      { id: 'rusutsu', name: 'ルスツリゾート', region: 'hokkaido', prefecture: '北海道', areaName: '留寿都村', lat: 42.7533, lng: 140.9067, topElevation: 994, baseElevation: 400, tag: '道内最大級・ツリーラン' },
+      { id: 'furano', name: '富良野スキー場', region: 'hokkaido', prefecture: '北海道', areaName: '富良野市', lat: 43.3242, lng: 142.3556, topElevation: 1074, baseElevation: 235, tag: '内陸ドライパウダー' },
+
+      // 長野
+      { id: 'hakuba', name: '白馬八方尾根スキー場', region: 'nagano', prefecture: '長野県', areaName: '白馬村', lat: 36.7025, lng: 137.8436, topElevation: 1831, baseElevation: 760, tag: '国内最高峰ビッグゲレンデ' },
+      { id: 'nozawa', name: '野沢温泉スキー場', region: 'nagano', prefecture: '長野県', areaName: '野沢温泉村', lat: 36.9167, lng: 138.4500, topElevation: 1650, baseElevation: 565, tag: '豪雪＆天然温泉街' },
+      { id: 'shiga', name: '志賀高原 焼額山スキー場', region: 'nagano', prefecture: '長野県', areaName: '山ノ内町', lat: 36.7456, lng: 138.5283, topElevation: 2009, baseElevation: 1550, tag: '標高2000m・超高品質' },
+      { id: 'karuizawa', name: '軽井沢プリンスホテルスキー場', region: 'nagano', prefecture: '長野県', areaName: '軽井沢町', lat: 36.3356, lng: 138.6319, topElevation: 1155, baseElevation: 940, tag: '晴天率高・アクセス抜群' },
+
+      // 新潟
+      { id: 'naeba', name: '苗場スキー場', region: 'niigata', prefecture: '新潟県', areaName: '湯沢町', lat: 36.7917, lng: 138.7844, topElevation: 1789, baseElevation: 900, tag: 'ビッグスケール' },
+      { id: 'gala', name: 'GALA湯沢スキー場', region: 'niigata', prefecture: '新潟県', areaName: '湯沢町', lat: 36.9483, lng: 138.7981, topElevation: 1181, baseElevation: 358, tag: '新幹線駅直結' },
+      { id: 'myoko', name: '妙高杉ノ原スキー場', region: 'niigata', prefecture: '新潟県', areaName: '妙高市', lat: 36.8778, lng: 138.1639, topElevation: 1855, baseElevation: 731, tag: '最長滑走8,500m' },
+      { id: 'akakura', name: '赤倉観光リゾートスキー場', region: 'niigata', prefecture: '新潟県', areaName: '妙高市', lat: 36.8928, lng: 138.1817, topElevation: 1500, baseElevation: 740, tag: '伝統リゾート＆極上雪' },
+
+      // 群馬
+      { id: 'kawaba', name: '川場スキー場', region: 'gunma', prefecture: '群馬県', areaName: '川場村', lat: 36.7761, lng: 139.1172, topElevation: 1870, baseElevation: 1290, tag: '立体駐車場直結・オフピステ' },
+      { id: 'marunuma', name: '丸沼高原スキー場', region: 'gunma', prefecture: '群馬県', areaName: '片品村', lat: 36.8336, lng: 139.3364, topElevation: 2000, baseElevation: 1400, tag: '標高2000mの絶景' },
+      { id: 'manza', name: '万座温泉スキー場', region: 'gunma', prefecture: '群馬県', areaName: '嬬恋村', lat: 36.6347, lng: 138.5131, topElevation: 1990, baseElevation: 1646, tag: '国内屈指の粉雪＆名湯' },
+
+      // 福島
+      { id: 'nekoma', name: '星野リゾート ネコマ マウンテン', region: 'fukushima', prefecture: '福島県', areaName: '磐梯町 / 北塩原村', lat: 37.6083, lng: 140.0525, topElevation: 1338, baseElevation: 680, tag: '南北連結ビッグゲレンデ' },
+      { id: 'grandeco', name: 'グランデコスノーリゾート', region: 'fukushima', prefecture: '福島県', areaName: '北塩原村', lat: 37.6975, lng: 140.1194, topElevation: 1590, baseElevation: 1010, tag: '神雪パウダースノー' },
+
+      // 宮城
+      { id: 'miyagizao', name: 'みやぎ蔵王えぼしリゾート', region: 'miyagi', prefecture: '宮城県', areaName: '蔵王町', lat: 38.1389, lng: 140.5283, topElevation: 1350, baseElevation: 600, tag: '宮城最大級・蔵王連峰一望' },
+      { id: 'springvalley', name: 'スプリングバレー仙台泉', region: 'miyagi', prefecture: '宮城県', areaName: '仙台市泉区', lat: 38.4172, lng: 140.7183, topElevation: 950, baseElevation: 687, tag: '仙台近郊・ナイター充実' },
+
+      // 静岡
+      { id: 'yeti', name: 'スノーパーク イエティ', region: 'shizuoka', prefecture: '静岡県', areaName: '裾野市 (富士山南麓)', lat: 35.2978, lng: 138.7758, topElevation: 1450, baseElevation: 1300, tag: '日本最速オープン・富士山' }
+    ];
+
+    // --- スコア評価プリセット ---
+    const PRESETS = [
+      { id: 'balance', name: 'スタンダード (推奨)', desc: '新雪・雪質・天候・風速をバランスよく総合判定', weights: { freshSnow: 25, snowDepth: 20, temperature: 20, wind: 20, weather: 15 } },
+      { id: 'powder', name: 'パウダーハント', desc: '夜間の降雪量と氷点下の極上ドライパウダーを最重要視', weights: { freshSnow: 45, snowDepth: 15, temperature: 25, wind: 10, weather: 5 } },
+      { id: 'comfort', name: '快適・ファミリー', desc: '穏やかな風・晴天率・適温を重視（初心者・ファミリー向き）', weights: { freshSnow: 5, snowDepth: 15, temperature: 25, wind: 30, weather: 25 } },
+      { id: 'cruising', name: 'グルーミング・爽快', desc: '十分なベース積雪と視界良好な圧雪バーンでの滑走重視', weights: { freshSnow: 10, snowDepth: 30, temperature: 15, wind: 25, weather: 20 } }
+    ];
+
+    // --- 計算ロジック ---
+    const clamp = (val, min, max) => Math.min(Math.max(val, min), max);
+    const lerp = (x, x0, x1, y0, y1) => {
+      if (x0 === x1) return y0;
+      const t = clamp((x - x0) / (x1 - x0), 0, 1);
+      return y0 + t * (y1 - y0);
+    };
+
+    const getWeatherInfo = (code) => {
+      switch (code) {
+        case 0: return { label: '快晴', icon: '☀️', type: 'clear', baseScore: 100 };
+        case 1: return { label: 'ほぼ晴れ', icon: '🌤️', type: 'clear', baseScore: 90 };
+        case 2: return { label: '晴れ時々曇', icon: '⛅', type: 'cloudy', baseScore: 80 };
+        case 3: return { label: '曇り', icon: '☁️', type: 'cloudy', baseScore: 65 };
+        case 45: case 48: return { label: '濃霧・視界不良', icon: '🌫️', type: 'fog', baseScore: 35 };
+        case 51: case 53: case 55: return { label: '霧雨', icon: '🌦️', type: 'rain', baseScore: 25 };
+        case 61: case 63: case 65: return { label: '雨', icon: '🌧️', type: 'rain', baseScore: 10 };
+        case 71: return { label: '小雪', icon: '🌨️', type: 'snow', baseScore: 85 };
+        case 73: return { label: '適度な雪', icon: '❄️', type: 'snow', baseScore: 92 };
+        case 75: return { label: '大雪・吹雪', icon: '🌨️❄️', type: 'snow', baseScore: 75 };
+        case 80: case 81: case 82: return { label: 'にわか雨', icon: '🌦️', type: 'rain', baseScore: 20 };
+        case 85: case 86: return { label: 'にわか雪', icon: '🌨️', type: 'snow', baseScore: 85 };
+        case 95: case 96: case 99: return { label: '雷雨・雷雪', icon: '⚡', type: 'storm', baseScore: 5 };
+        default: return { label: '曇り', icon: '☁️', type: 'cloudy', baseScore: 60 };
+      }
+    };
+
+    const calculateFactorScores = ({ freshSnow12h, snowDepthCm, temp, windSpeed, windGust, weatherCode }) => {
+      let freshScore = freshSnow12h <= 0 ? 0 : freshSnow12h < 5 ? lerp(freshSnow12h, 0, 5, 10, 50) : freshSnow12h < 15 ? lerp(freshSnow12h, 5, 15, 50, 90) : 100;
+
+      let depthScore = 0;
+      if (snowDepthCm <= 0) depthScore = 0;
+      else if (snowDepthCm < 15) depthScore = lerp(snowDepthCm, 0, 15, 0, 10);
+      else if (snowDepthCm < 30) depthScore = lerp(snowDepthCm, 15, 30, 10, 30);
+      else if (snowDepthCm < 80) depthScore = lerp(snowDepthCm, 30, 80, 30, 70);
+      else if (snowDepthCm < 150) depthScore = lerp(snowDepthCm, 80, 150, 70, 95);
+      else depthScore = 100;
+
+      let tempScore = 50;
+      if (temp >= -10 && temp <= -3) tempScore = 100;
+      else if (temp > -3 && temp <= 2) tempScore = lerp(temp, -3, 2, 100, 35);
+      else if (temp > 2) tempScore = lerp(temp, 2, 8, 35, 10);
+      else if (temp < -10) tempScore = lerp(temp, -20, -10, 45, 100);
+
+      let windScore = lerp(windSpeed, 2, 14, 100, 15);
+      if (windGust > 18) windScore = Math.min(windScore, 15);
+      else if (windGust > 14) windScore = Math.min(windScore, 35);
+
+      const weatherInfo = getWeatherInfo(weatherCode);
+      const weatherScore = weatherInfo.baseScore;
+
+      return {
+        freshSnow: Math.round(freshScore),
+        snowDepth: Math.round(depthScore),
+        temperature: Math.round(tempScore),
+        wind: Math.round(windScore),
+        weather: Math.round(weatherScore),
+        weatherInfo
+      };
+    };
+
+    const calculateTotalScore = (factors, weights) => {
+      const totalWeight = weights.freshSnow + weights.snowDepth + weights.temperature + weights.wind + weights.weather;
+      const norm = (w) => (w / (totalWeight || 100));
+
+      let raw = factors.freshSnow * norm(weights.freshSnow) +
+                factors.snowDepth * norm(weights.snowDepth) +
+                factors.temperature * norm(weights.temperature) +
+                factors.wind * norm(weights.wind) +
+                factors.weather * norm(weights.weather);
+
+      let isClosed = false;
+      if (factors.snowDepth <= 10) {
+        isClosed = true;
+        raw = Math.min(raw, 5);
+      } else if (factors.weatherInfo.type === 'rain') {
+        raw = Math.min(raw, 35);
+      } else if (factors.wind <= 20) {
+        raw = Math.min(raw, 40);
+      }
+
+      const score = Math.round(clamp(raw, 0, 100));
+
+      let badge = { rank: 'C', level: 'TOUGH', title: 'タフコンディション', color: '#ef4444', bgLight: 'rgba(239, 68, 68, 0.15)', comment: '風雪またはコンディション悪化に注意。無理せず滑走を。' };
+
+      if (isClosed || score <= 10) {
+        badge = {
+          rank: '-',
+          level: 'CLOSED',
+          title: 'シーズン前 / 積雪なし',
+          color: '#94a3b8',
+          bgLight: 'rgba(148, 163, 184, 0.15)',
+          comment: '現在ゲレンデに積雪がありません（積雪0cm）。本格的な降雪・オープンをお待ちください。'
+        };
+      } else if (score >= 90) {
+        badge = { rank: 'SSS', level: 'THE DAY', title: '奇跡のTHE DAY！', color: '#38bdf8', bgLight: 'rgba(56, 189, 248, 0.2)', comment: '極上ドライパウダー＆好コンディション！迷わず山へ行くべき最高の一日。' };
+      } else if (score >= 78) {
+        badge = { rank: 'S', level: 'EPIC', title: '極上コンディション', color: '#06b6d4', bgLight: 'rgba(6, 182, 212, 0.2)', comment: '雪質・天候ともにハイレベル。最高に気持ちいいターンが楽しめます。' };
+      } else if (score >= 65) {
+        badge = { rank: 'A', level: 'GOOD', title: '良好コンディション', color: '#10b981', bgLight: 'rgba(16, 185, 129, 0.15)', comment: 'ゲレンデを存分に楽しめるナイスデイ。万全の準備で楽しもう。' };
+      } else if (score >= 50) {
+        badge = { rank: 'B', level: 'AVERAGE', title: '平均的コンディション', color: '#f59e0b', bgLight: 'rgba(245, 158, 11, 0.15)', comment: '滑走可能ですが雪質の変化や天候急変に注意して防寒を調整。' };
+      }
+
+      return { score, badge, factors };
+    };
+
+    // --- Open-Meteo API ---
+    const fetchWeather = async (resort, weights) => {
+      try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${resort.lat}&longitude=${resort.lng}&elevation=${resort.topElevation}&hourly=temperature_2m,precipitation,snowfall,snow_depth,weather_code,wind_speed_10m,wind_gusts_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,snowfall_sum,wind_speed_10m_max&wind_speed_unit=ms&timezone=Asia%2FTokyo&forecast_days=7`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('API Error');
+        const data = await res.json();
+        return processData(resort, data, weights);
+      } catch (e) {
+        return processData(resort, null, weights);
+      }
+    };
+
+    const processData = (resort, data, weights) => {
+      let freshSnow12h = 0, snowDepthCm = 0, temp = 6, windSpeed = 3, windGust = 5, weatherCode = 1;
+      const next24Hours = [];
+      const dailyForecast = [];
+
+      if (data && data.hourly) {
+        const hourly = data.hourly;
+        const now = Date.now();
+        let curIdx = 0;
+        let minDiff = Infinity;
+        hourly.time.forEach((t, i) => {
+          const diff = Math.abs(new Date(t).getTime() - now);
+          if (diff < minDiff) { minDiff = diff; curIdx = i; }
+        });
+
+        for (let i = Math.max(0, curIdx - 11); i <= curIdx; i++) {
+          freshSnow12h += hourly.snowfall?.[i] ?? 0;
+        }
+
+        const depthM = hourly.snow_depth?.[curIdx] ?? 0;
+        snowDepthCm = Math.round(depthM * 100);
+
+        temp = Math.round((hourly.temperature_2m?.[curIdx] ?? 5) * 10) / 10;
+        windSpeed = Math.round((hourly.wind_speed_10m?.[curIdx] ?? 3) * 10) / 10;
+        windGust = Math.round((hourly.wind_gusts_10m?.[curIdx] ?? 5) * 10) / 10;
+        weatherCode = hourly.weather_code?.[curIdx] ?? 1;
+
+        for (let i = 0; i < 24 && curIdx + i < hourly.time.length; i++) {
+          const idx = curIdx + i;
+          const d = new Date(hourly.time[idx]);
+          let sWin = 0;
+          for (let k = Math.max(0, idx - 11); k <= idx; k++) sWin += hourly.snowfall?.[k] ?? 0;
+
+          const hDepthM = hourly.snow_depth?.[idx] ?? 0;
+          const hFac = calculateFactorScores({
+            freshSnow12h: Math.round(sWin * 10) / 10,
+            snowDepthCm: Math.round(hDepthM * 100),
+            temp: hourly.temperature_2m?.[idx] ?? 0,
+            windSpeed: hourly.wind_speed_10m?.[idx] ?? 0,
+            windGust: hourly.wind_gusts_10m?.[idx] ?? 0,
+            weatherCode: hourly.weather_code?.[idx] ?? 0
+          });
+          const hRes = calculateTotalScore(hFac, weights);
+
+          next24Hours.push({
+            time: d.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }),
+            temp: Math.round(hourly.temperature_2m?.[idx] || 0),
+            snowfall: Math.round((hourly.snowfall?.[idx] || 0) * 10) / 10,
+            windSpeed: Math.round(hourly.wind_speed_10m?.[idx] || 0),
+            weatherInfo: hFac.weatherInfo,
+            score: hRes.score,
+            badge: hRes.badge
+          });
+        }
+
+        if (data.daily) {
+          data.daily.time.forEach((dStr, idx) => {
+            const dDate = new Date(dStr);
+            const dayName = ['日', '月', '火', '水', '木', '金', '土'][dDate.getDay()];
+            const dSnow = data.daily.snowfall_sum?.[idx] ?? 0;
+            const dMax = Math.round(data.daily.temperature_2m_max?.[idx] ?? 0);
+            const dMin = Math.round(data.daily.temperature_2m_min?.[idx] ?? 0);
+            const dWind = Math.round(data.daily.wind_speed_10m_max?.[idx] ?? 0);
+            const dCode = data.daily.weather_code?.[idx] ?? 0;
+
+            const dFac = calculateFactorScores({
+              freshSnow12h: dSnow,
+              snowDepthCm: snowDepthCm,
+              temp: (dMax + dMin) / 2,
+              windSpeed: dWind * 0.7,
+              windGust: dWind,
+              weatherCode: dCode
+            });
+            const dRes = calculateTotalScore(dFac, weights);
+
+            dailyForecast.push({
+              date: `${dDate.getMonth() + 1}/${dDate.getDate()}`,
+              dayName,
+              isToday: idx === 0,
+              weatherInfo: dFac.weatherInfo,
+              tempMax: dMax,
+              tempMin: dMin,
+              snowfallSum: Math.round(dSnow * 10) / 10,
+              windMax: dWind,
+              score: dRes.score,
+              badge: dRes.badge
+            });
+          });
+        }
+      } else {
+        const nowMonth = new Date().getMonth() + 1;
+        const isWinter = nowMonth >= 12 || nowMonth <= 3;
+        freshSnow12h = 0;
+        snowDepthCm = isWinter ? 120 : 0;
+        temp = isWinter ? -5 : 7;
+        windSpeed = 3.5;
+        windGust = 5.0;
+        weatherCode = 1;
+      }
+
+      const factors = calculateFactorScores({
+        freshSnow12h: Math.round(freshSnow12h * 10) / 10,
+        snowDepthCm,
+        temp,
+        windSpeed,
+        windGust,
+        weatherCode
+      });
+      const scoreResult = calculateTotalScore(factors, weights);
+
+      return {
+        resort,
+        current: {
+          freshSnow12h: Math.round(freshSnow12h * 10) / 10,
+          snowDepthCm,
+          temp,
+          windSpeed,
+          windGust,
+          weatherInfo: factors.weatherInfo
+        },
+        factors,
+        scoreResult,
+        next24Hours,
+        dailyForecast
+      };
+    };
+
+    // --- コンポーネント: Golf the Day 風サークルゲージ ---
+    const ScoreGauge = ({ score, size = 110, strokeWidth = 10, badge }) => {
+      const radius = (size - strokeWidth) / 2;
+      const circumference = 2 * Math.PI * radius;
+      const strokeDashoffset = circumference - (score / 100) * circumference;
+
+      const isClosed = badge?.level === 'CLOSED';
+      const stroke = isClosed ? '#64748b' : (badge?.color || '#38bdf8');
+
+      return (
+        <div className="relative flex flex-col items-center justify-center select-none" style={{ width: size, height: size }}>
+          <svg width={size} height={size} className="transform -rotate-90 filter drop-shadow-md">
+            <circle cx={size/2} cy={size/2} r={radius} stroke="rgba(255, 255, 255, 0.08)" strokeWidth={strokeWidth} fill="transparent" />
+            <circle
+              cx={size/2} cy={size/2} r={radius}
+              stroke={stroke} strokeWidth={strokeWidth}
+              strokeDasharray={circumference} strokeDashoffset={strokeDashoffset}
+              strokeLinecap="round" fill="transparent"
+              style={{ transition: 'stroke-dashoffset 0.8s ease' }}
+            />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+            {isClosed ? (
+              <span className="font-outfit font-black text-xs text-slate-400">CLOSED</span>
+            ) : (
+              <span className="font-outfit font-black tracking-tight" style={{ fontSize: size * 0.32, color: stroke, lineHeight: 1 }}>
+                {score}
+              </span>
+            )}
+            <span className="text-[9px] uppercase font-bold tracking-wider text-slate-400 mt-0.5">SCORE</span>
+          </div>
+        </div>
+      );
+    };
+
+    // --- フリー地図コンポーネント (OpenStreetMap + Leaflet / 完全無料・APIキー不要) ---
+    function FreeSkiMap({ resorts, onSelectResort }) {
+      const mapContainerRef = useRef(null);
+      const mapRef = useRef(null);
+      const layerGroupRef = useRef(null);
+      const [tileStyle, setTileStyle] = useState('dark');
+
+      const tiles = {
+        dark: {
+          url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+          attr: '&copy; OpenStreetMap contributors &copy; CARTO'
+        },
+        terrain: {
+          url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+          attr: '&copy; OpenStreetMap contributors &copy; CARTO'
+        },
+        osm: {
+          url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          attr: '&copy; OpenStreetMap contributors'
+        }
+      };
+
+      useEffect(() => {
+        if (!mapContainerRef.current || !window.L) return;
+
+        if (!mapRef.current) {
+          const map = L.map(mapContainerRef.current, {
+            center: [37.2, 138.8],
+            zoom: 6.4,
+            minZoom: 5,
+            maxZoom: 16
+          });
+          mapRef.current = map;
+
+          L.tileLayer(tiles[tileStyle].url, {
+            attribution: tiles[tileStyle].attr,
+            subdomains: 'abcd',
+            maxZoom: 19
+          }).addTo(map);
+
+          layerGroupRef.current = L.layerGroup().addTo(map);
+        }
+
+        return () => {
+          if (mapRef.current) {
+            mapRef.current.remove();
+            mapRef.current = null;
+          }
+        };
+      }, []);
+
+      // スタイル変更時
+      const switchStyle = (s) => {
+        setTileStyle(s);
+        if (mapRef.current && window.L) {
+          mapRef.current.eachLayer(l => {
+            if (l instanceof L.TileLayer) mapRef.current.removeLayer(l);
+          });
+          L.tileLayer(tiles[s].url, {
+            attribution: tiles[s].attr,
+            subdomains: 'abcd',
+            maxZoom: 19
+          }).addTo(mapRef.current);
+        }
+      };
+
+      // マーカー描画
+      useEffect(() => {
+        if (!mapRef.current || !layerGroupRef.current || !window.L) return;
+
+        layerGroupRef.current.clearLayers();
+
+        resorts.forEach(item => {
+          const { resort, scoreResult, current } = item;
+          const isClosed = scoreResult.badge.level === 'CLOSED';
+          const pinColor = isClosed ? '#64748b' : scoreResult.badge.color;
+          const pinText = isClosed ? 'CLOSED' : `${scoreResult.score}`;
+          const pinIcon = isClosed ? '⏸️' : '❄️';
+
+          const icon = L.divIcon({
+            className: 'custom-ski-pin',
+            html: `
+              <div style="display:inline-flex; flex-direction:column; align-items:center; cursor:pointer; filter:drop-shadow(0 4px 6px rgba(0,0,0,0.6)); transform:translate(-50%, -100%);">
+                <div style="background-color:${pinColor}; color:#020617; padding:3px 8px; border-radius:9999px; font-family:'Outfit',sans-serif; font-weight:900; font-size:11px; display:flex; align-items:center; gap:3px; white-space:nowrap; border:2px solid rgba(255,255,255,0.95);">
+                  <span>${pinIcon}</span>
+                  <span>${pinText}</span>
+                </div>
+                <div style="width:8px; height:8px; background-color:${pinColor}; transform:rotate(45deg); margin-top:-4px; border-right:2px solid rgba(255,255,255,0.9); border-bottom:2px solid rgba(255,255,255,0.9);"></div>
+              </div>
+            `,
+            iconSize: [0, 0]
+          });
+
+          const marker = L.marker([resort.lat, resort.lng], { icon });
+
+          const popupHtml = `
+            <div style="font-family:'Noto Sans JP',sans-serif; color:#0f172a; min-width:210px; padding:2px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <span style="font-size:10px; font-weight:bold; background:#e0f2fe; color:#0284c7; padding:1px 6px; border-radius:4px;">${resort.prefecture}</span>
+                <span style="font-size:10px; font-weight:900; color:${pinColor};">${scoreResult.badge.level}</span>
+              </div>
+              <h4 style="margin:2px 0 4px 0; font-size:13px; font-weight:bold;">${resort.name}</h4>
+              <p style="font-size:10px; color:#64748b; margin:0 0 6px 0;">標高: ${resort.baseElevation}m - ${resort.topElevation}m</p>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px; font-size:11px; background:#f8fafc; padding:6px; border-radius:6px; margin-bottom:6px;">
+                <div>スコア: <strong>${scoreResult.score}点</strong></div>
+                <div>積雪深: <strong>${current.snowDepthCm}cm</strong></div>
+                <div>12h新雪: <strong>+${current.freshSnow12h}cm</strong></div>
+                <div>山頂気温: <strong>${current.temp}℃</strong></div>
+              </div>
+              <button id="osm-btn-${resort.id}" style="width:100%; background:#0284c7; color:#fff; border:none; padding:6px; border-radius:6px; font-size:11px; font-weight:bold; cursor:pointer;">
+                詳細レポートを開く →
+              </button>
+            </div>
+          `;
+
+          marker.bindPopup(popupHtml);
+          marker.on('popupopen', () => {
+            const btn = document.getElementById(`osm-btn-${resort.id}`);
+            if (btn) {
+              btn.onclick = () => {
+                onSelectResort(item);
+                marker.closePopup();
+              };
+            }
+          });
+
+          layerGroupRef.current.addLayer(marker);
+        });
+      }, [resorts]);
+
+      return (
+        <div className="relative w-full rounded-3xl overflow-hidden border border-slate-800 bg-slate-900 shadow-2xl">
+          <div className="p-4 px-6 bg-slate-950/85 backdrop-blur-md border-b border-slate-800 flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-sky-400 font-bold">📍 全国ゲレンデマップ</span>
+              <span className="text-xs text-emerald-400 font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                完全フリー・APIキー不要 (OpenStreetMap)
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs">
+              <button
+                onClick={() => switchStyle('dark')}
+                className={`px-2.5 py-1 rounded-lg font-bold transition-all ${tileStyle === 'dark' ? 'bg-sky-500 text-slate-950' : 'text-slate-400 hover:text-white'}`}
+              >
+                ダーク
+              </button>
+              <button
+                onClick={() => switchStyle('terrain')}
+                className={`px-2.5 py-1 rounded-lg font-bold transition-all ${tileStyle === 'terrain' ? 'bg-sky-500 text-slate-950' : 'text-slate-400 hover:text-white'}`}
+              >
+                山岳・地形
+              </button>
+              <button
+                onClick={() => switchStyle('osm')}
+                className={`px-2.5 py-1 rounded-lg font-bold transition-all ${tileStyle === 'osm' ? 'bg-sky-500 text-slate-950' : 'text-slate-400 hover:text-white'}`}
+              >
+                標準OSM
+              </button>
+            </div>
+          </div>
+
+          <div ref={mapContainerRef} className="w-full h-[520px] bg-slate-900" style={{ zIndex: 1 }} />
+
+          {/* 凡例 */}
+          <div className="absolute bottom-4 left-4 z-[400] p-3 bg-slate-950/90 backdrop-blur-md border border-slate-800 rounded-2xl text-[11px] space-y-1.5 shadow-xl pointer-events-none">
+            <div className="font-bold text-slate-300 mb-1">ピンのスコア凡例</div>
+            <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-sky-400 inline-block shadow-sm"></span><span>90点〜: THE DAY</span></div>
+            <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-cyan-400 inline-block"></span><span>78〜89点: EPIC</span></div>
+            <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-emerald-400 inline-block"></span><span>65〜77点: GOOD</span></div>
+            <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-slate-500 inline-block"></span><span>CLOSED: 積雪ゼロ / シーズン前</span></div>
+          </div>
+        </div>
+      );
+    }
+
+    // --- メインアプリケーション ---
+    function App() {
+      const [weights, setWeights] = useState(PRESETS[0].weights);
+      const [dataList, setDataList] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [refreshing, setRefreshing] = useState(false);
+      const [selectedRegion, setSelectedRegion] = useState('all');
+      const [sortBy, setSortBy] = useState('score');
+      const [searchQuery, setSearchQuery] = useState('');
+      const [selectedResort, setSelectedResort] = useState(null);
+      const [showWeightModal, setShowWeightModal] = useState(false);
+      const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'map'
+      const [lastUpdated, setLastUpdated] = useState('');
+
+      const loadData = async (w, isSilent = false) => {
+        if (!isSilent) setLoading(true);
+        setRefreshing(true);
+        try {
+          const promises = RESORTS.map(r => fetchWeather(r, w));
+          const res = await Promise.all(promises);
+          setDataList(res);
+          setLastUpdated(new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }));
+        } catch (e) {
+          console.error(e);
+        } finally {
+          setLoading(false);
+          setRefreshing(false);
+        }
+      };
+
+      useEffect(() => { loadData(weights); }, []);
+
+      const handleSaveWeights = (newWeights) => {
+        setWeights(newWeights);
+        loadData(newWeights, true);
+        setShowWeightModal(false);
+      };
+
+      const filteredList = useMemo(() => {
+        let list = [...dataList];
+        if (selectedRegion !== 'all') {
+          list = list.filter(item => item.resort.region === selectedRegion);
+        }
+        if (searchQuery.trim()) {
+          const q = searchQuery.toLowerCase().trim();
+          list = list.filter(item =>
+            item.resort.name.toLowerCase().includes(q) ||
+            item.resort.prefecture.toLowerCase().includes(q) ||
+            item.resort.tag.toLowerCase().includes(q)
+          );
+        }
+        list.sort((a, b) => {
+          if (sortBy === 'score') return b.scoreResult.score - a.scoreResult.score;
+          if (sortBy === 'freshSnow') return b.current.freshSnow12h - a.current.freshSnow12h;
+          if (sortBy === 'snowDepth') return b.current.snowDepthCm - a.current.snowDepthCm;
+          if (sortBy === 'temp') return a.current.temp - b.current.temp;
+          if (sortBy === 'wind') return a.current.windSpeed - b.current.windSpeed;
+          return 0;
+        });
+        return list;
+      }, [dataList, selectedRegion, sortBy, searchQuery]);
+
+      const topResort = useMemo(() => {
+        if (!dataList.length) return null;
+        return [...dataList].sort((a, b) => b.scoreResult.score - a.scoreResult.score)[0];
+      }, [dataList]);
+
+      const currentPresetName = useMemo(() => {
+        const found = PRESETS.find(p =>
+          p.weights.freshSnow === weights.freshSnow &&
+          p.weights.snowDepth === weights.snowDepth &&
+          p.weights.temperature === weights.temperature &&
+          p.weights.wind === weights.wind &&
+          p.weights.weather === weights.weather
+        );
+        return found ? found.name : 'カスタム設定';
+      }, [weights]);
+
+      return (
+        <div className="min-h-screen bg-slate-950 pb-20">
+          {/* ナビゲーションバー */}
+          <header className="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/80">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-600 to-cyan-400 p-0.5 shadow-lg shadow-sky-500/20">
+                  <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center text-sky-400 text-lg">
+                    ❄️
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h1 className="font-outfit font-black text-xl tracking-tight text-white">
+                      SKI <span className="text-sky-400">THE DAY</span>
+                    </h1>
+                    <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-sky-500/10 text-sky-400 border border-sky-400/20">
+                      FREE MAP
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-400">気象AI分析による全国スキー場スコア評価</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowWeightModal(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 hover:border-sky-400/50 text-slate-200 text-xs font-semibold shadow-sm transition-all"
+                >
+                  <span className="text-slate-400 text-[11px] hidden sm:inline">重視:</span>
+                  <span className="text-sky-300 font-bold">{currentPresetName}</span>
+                  <span className="text-xs">⚙️</span>
+                </button>
+                <button
+                  onClick={() => loadData(weights)}
+                  disabled={refreshing}
+                  className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-semibold transition-all disabled:opacity-50"
+                >
+                  {refreshing ? '更新中...' : '🔄 更新'}
+                </button>
+              </div>
+            </div>
+          </header>
+
+          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-8">
+            {/* 今日のトップゲレンデ */}
+            {topResort && (
+              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-sky-950/40 to-slate-900 border border-sky-500/30 p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
+                <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+                  <div className="space-y-2.5 max-w-xl text-center lg:text-left">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-500/20 border border-sky-400/30 text-sky-300 text-xs font-black uppercase">
+                      ✨ 本日の全国最高スコア
+                    </span>
+                    <h2 className="text-3xl sm:text-4xl font-black text-white">{topResort.resort.name}</h2>
+                    <p className="text-xs text-slate-400">
+                      {topResort.resort.prefecture} • {topResort.resort.areaName} • 標高 {topResort.resort.baseElevation}m〜{topResort.resort.topElevation}m
+                    </p>
+                    <p className="text-sm text-slate-300 pt-1 leading-relaxed">
+                      {topResort.scoreResult.badge.comment}
+                    </p>
+                    <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-2 text-xs">
+                      <span className="px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700 text-slate-200">
+                        ❄️ 12h新雪: <strong className="text-cyan-300 font-outfit">+{topResort.current.freshSnow12h}cm</strong>
+                      </span>
+                      <span className="px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700 text-slate-200">
+                        🏔️ 積雪: <strong className="text-white font-outfit">{topResort.current.snowDepthCm}cm</strong>
+                      </span>
+                      <span className="px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700 text-slate-200">
+                        🌡️ 気温: <strong className="text-white font-outfit">{topResort.current.temp}℃</strong>
+                      </span>
+                      <span className="px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700 text-slate-200">
+                        💨 風速: <strong className="text-white font-outfit">{topResort.current.windSpeed}m/s</strong>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-5 bg-slate-950/60 p-6 rounded-3xl border border-sky-400/30">
+                    <ScoreGauge score={topResort.scoreResult.score} size={130} strokeWidth={11} badge={topResort.scoreResult.badge} />
+                    <div>
+                      <span
+                        className="px-2.5 py-1 rounded-md text-xs font-black uppercase tracking-wider border inline-block mb-1"
+                        style={{ backgroundColor: topResort.scoreResult.badge.bgLight, color: topResort.scoreResult.badge.color, borderColor: topResort.scoreResult.badge.color + '40' }}
+                      >
+                        {topResort.scoreResult.badge.level}
+                      </span>
+                      <div className="text-base font-bold text-white">{topResort.scoreResult.badge.title}</div>
+                      <button
+                        onClick={() => setSelectedResort(topResort)}
+                        className="mt-2 text-xs font-bold text-sky-400 hover:text-sky-300 flex items-center gap-1"
+                      >
+                        詳細レポートを見る →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* フィルター・ソート・表示切替 */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                {REGIONS.map(reg => (
+                  <button
+                    key={reg.id}
+                    onClick={() => setSelectedRegion(reg.id)}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+                      selectedRegion === reg.id
+                        ? 'bg-sky-500 text-slate-950 shadow-lg shadow-sky-500/20'
+                        : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+                    }`}
+                  >
+                    {reg.name}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-900/60 p-3 rounded-2xl border border-slate-800">
+                <input
+                  type="text"
+                  placeholder="スキー場名・地域で検索..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full sm:w-80 px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400"
+                />
+
+                <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
+                  {/* ビュー切替ボタン */}
+                  <div className="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800">
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${viewMode === 'grid' ? 'bg-sky-500 text-slate-950' : 'text-slate-400 hover:text-white'}`}
+                    >
+                      📋 カード
+                    </button>
+                    <button
+                      onClick={() => setViewMode('map')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${viewMode === 'map' ? 'bg-sky-500 text-slate-950' : 'text-slate-400 hover:text-white'}`}
+                    >
+                      📍 マップ (無料)
+                    </button>
+                  </div>
+
+                  <span className="text-xs text-slate-400 hidden md:inline">並び順:</span>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="bg-slate-950 border border-slate-800 text-xs font-semibold text-slate-200 py-2 px-3 rounded-xl focus:outline-none focus:border-sky-400"
+                  >
+                    <option value="score">🏆 総合スコア順</option>
+                    <option value="freshSnow">❄️ 12h新雪量順</option>
+                    <option value="snowDepth">🏔️ 積雪深順</option>
+                    <option value="temp">🌡️ 気温が低い順</option>
+                    <option value="wind">💨 風が穏やかな順</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* メインコンテンツ: マップ または カード */}
+            {viewMode === 'map' ? (
+              <FreeSkiMap resorts={filteredList} onSelectResort={setSelectedResort} />
+            ) : (
+              <div>
+                <div className="text-xs text-slate-400 mb-3 flex items-center justify-between">
+                  <span>対象スキー場: <strong className="text-white">{filteredList.length}</strong> 件</span>
+                  <span className="text-[11px] text-slate-500">※カードをクリックして24h推移・週間予報を表示</span>
+                </div>
+
+                {loading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {[1, 2, 3, 4, 5, 6].map(i => (
+                      <div key={i} className="h-64 rounded-2xl bg-slate-900/40 border border-slate-800 animate-pulse p-6" />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {filteredList.map(item => {
+                      const { resort, current, scoreResult } = item;
+                      const { score, badge } = scoreResult;
+                      const isWindRisk = current.windSpeed > 12;
+
+                      return (
+                        <div
+                          key={resort.id}
+                          onClick={() => setSelectedResort(item)}
+                          className="group relative bg-slate-900/80 hover:bg-slate-850 border border-slate-800 hover:border-sky-500/50 rounded-2xl p-5 cursor-pointer transition-all duration-300 shadow-lg hover:shadow-sky-500/10 hover:-translate-y-1 flex flex-col justify-between"
+                        >
+                          <div>
+                            <div className="flex items-center justify-between gap-2 mb-2">
+                              <div className="flex items-center gap-1.5">
+                                <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-800 text-sky-400 border border-sky-400/20">
+                                  {resort.prefecture}
+                                </span>
+                                <span className="text-xs text-slate-400">{resort.areaName}</span>
+                              </div>
+                              <span
+                                className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider border"
+                                style={{ backgroundColor: badge.bgLight, color: badge.color, borderColor: badge.color + '40' }}
+                              >
+                                {badge.level}
+                              </span>
+                            </div>
+
+                            <h3 className="text-lg font-bold text-white group-hover:text-sky-300 transition-colors line-clamp-1 mb-1">
+                              {resort.name}
+                            </h3>
+                            <p className="text-xs text-slate-400 mb-4">
+                              #{resort.tag} • 標高 {resort.baseElevation}m-{resort.topElevation}m
+                            </p>
+
+                            <div className="flex items-center justify-between py-2 border-y border-slate-800 mb-4">
+                              <div className="flex items-center gap-3">
+                                <ScoreGauge score={score} size={84} strokeWidth={8} badge={badge} />
+                                <div>
+                                  <div className="text-xs font-semibold text-slate-400">Condition</div>
+                                  <div className="text-sm font-bold text-white" style={{ color: badge.color }}>{badge.title}</div>
+                                  <div className="text-[11px] text-slate-400 line-clamp-2 max-w-[130px]">{badge.comment}</div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-3xl mb-1">{current.weatherInfo.icon}</div>
+                                <span className="text-xs text-slate-300 font-medium">{current.weatherInfo.label}</span>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                              <div className="p-2.5 rounded-xl bg-slate-800/40 border border-slate-800">
+                                <div className="text-[11px] text-slate-400">❄️ 12h新雪</div>
+                                <div className="font-outfit font-bold text-cyan-300 text-sm mt-0.5">
+                                  {current.freshSnow12h > 0 ? `+${current.freshSnow12h}cm` : '0cm'}
+                                </div>
+                              </div>
+
+                              <div className={`p-2.5 rounded-xl border ${current.snowDepthCm <= 0 ? 'bg-slate-900 border-slate-800 text-slate-500' : 'bg-slate-800/40 border-slate-800'}`}>
+                                <div className="text-[11px] text-slate-400">🏔️ 積雪深</div>
+                                <div className="font-outfit font-bold text-slate-200 text-sm mt-0.5">
+                                  {current.snowDepthCm}cm
+                                </div>
+                              </div>
+
+                              <div className="p-2.5 rounded-xl bg-slate-800/40 border border-slate-800">
+                                <div className="text-[11px] text-slate-400">🌡️ 山頂気温</div>
+                                <div className="font-outfit font-bold text-slate-200 text-sm mt-0.5">
+                                  {current.temp}℃
+                                </div>
+                              </div>
+
+                              <div className={`p-2.5 rounded-xl border ${isWindRisk ? 'bg-rose-950/30 border-rose-500/40' : 'bg-slate-800/40 border-slate-800'}`}>
+                                <div className="text-[11px] text-slate-400">💨 風速</div>
+                                <div className={`font-outfit font-bold text-sm mt-0.5 ${isWindRisk ? 'text-rose-400' : 'text-slate-200'}`}>
+                                  {current.windSpeed}m/s
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-sky-400 font-semibold">
+                            <span>詳細推移を見る</span>
+                            <span>→</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+          </main>
+
+          {/* 詳細モーダル */}
+          {selectedResort && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto" onClick={() => setSelectedResort(null)}>
+              <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-700 rounded-3xl p-6 shadow-2xl my-auto" onClick={e => e.stopPropagation()}>
+                <div className="flex items-start justify-between pb-4 border-b border-slate-800">
+                  <div>
+                    <span className="text-xs text-sky-400 font-semibold">{selectedResort.resort.prefecture} • {selectedResort.resort.areaName}</span>
+                    <h2 className="text-2xl font-black text-white">{selectedResort.resort.name}</h2>
+                    <p className="text-xs text-slate-400">標高 {selectedResort.resort.baseElevation}m〜{selectedResort.resort.topElevation}m</p>
+                  </div>
+                  <button onClick={() => setSelectedResort(null)} className="p-2 rounded-full bg-slate-800 text-slate-400 hover:text-white">✕</button>
+                </div>
+
+                <div className="py-6 flex items-center justify-between gap-6 border-b border-slate-800">
+                  <div className="flex items-center gap-5">
+                    <ScoreGauge score={selectedResort.scoreResult.score} size={110} strokeWidth={10} badge={selectedResort.scoreResult.badge} />
+                    <div>
+                      <span className="px-2.5 py-0.5 rounded text-xs font-black uppercase tracking-wider" style={{ backgroundColor: selectedResort.scoreResult.badge.bgLight, color: selectedResort.scoreResult.badge.color }}>
+                        {selectedResort.scoreResult.badge.level}
+                      </span>
+                      <div className="text-lg font-bold text-white mt-1">{selectedResort.scoreResult.badge.title}</div>
+                      <p className="text-xs text-slate-300 mt-1">{selectedResort.scoreResult.badge.comment}</p>
+                    </div>
+                  </div>
+                  <div className="text-center p-3 rounded-2xl bg-slate-800/60 border border-slate-700 min-w-[100px]">
+                    <div className="text-3xl">{selectedResort.current.weatherInfo.icon}</div>
+                    <div className="text-xs font-bold text-white mt-1">{selectedResort.current.weatherInfo.label}</div>
+                    <div className="text-xs text-sky-300">{selectedResort.current.temp}℃</div>
+                  </div>
+                </div>
+
+                {/* 24h推移 */}
+                <div className="pt-4">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">🕒 24時間スノースコア予測</h4>
+                  <div className="overflow-x-auto pb-2">
+                    <div className="flex gap-2 min-w-max">
+                      {selectedResort.next24Hours?.map((h, i) => (
+                        <div key={i} className="p-2.5 rounded-xl bg-slate-800/40 border border-slate-800 text-center min-w-[70px]">
+                          <div className="text-xs text-slate-400 font-semibold">{h.time}</div>
+                          <div className="text-xl my-1">{h.weatherInfo.icon}</div>
+                          <div className="text-xs font-bold text-white">{h.temp}℃</div>
+                          <div className="text-[10px] text-cyan-300">{h.snowfall > 0 ? `+${h.snowfall}cm` : '-'}</div>
+                          <div className="mt-1 px-1.5 py-0.5 rounded text-[11px] font-outfit font-black" style={{ backgroundColor: h.badge.bgLight, color: h.badge.color }}>
+                            {h.score}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 週間予報 */}
+                <div className="pt-4 border-t border-slate-800 mt-4">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">📅 週間7日間予測</h4>
+                  <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                    {selectedResort.dailyForecast?.map((d, i) => (
+                      <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-slate-800/30 text-xs">
+                        <span className="font-bold text-white w-20">{d.date} ({d.dayName})</span>
+                        <span className="flex items-center gap-1.5 w-24">
+                          <span>{d.weatherInfo.icon}</span>
+                          <span className="text-slate-300 text-[11px]">{d.weatherInfo.label}</span>
+                        </span>
+                        <span className="text-slate-300 w-20">{d.tempMax}℃ / {d.tempMin}℃</span>
+                        <span className="text-cyan-300 font-semibold w-24 text-right">{d.snowfallSum > 0 ? `降雪 ${d.snowfallSum}cm` : '-'}</span>
+                        <span className="px-2 py-0.5 rounded font-outfit font-bold" style={{ backgroundColor: d.badge.bgLight, color: d.badge.color }}>
+                          {d.score}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 重み設定モーダル */}
+          {showWeightModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md" onClick={() => setShowWeightModal(false)}>
+              <div className="relative w-full max-w-md bg-slate-900 border border-slate-700 rounded-3xl p-6 shadow-2xl" onClick={e => e.stopPropagation()}>
+                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+                  <h3 className="text-lg font-bold text-white">⚙️ スコア評価の重み設定</h3>
+                  <button onClick={() => setShowWeightModal(false)} className="text-slate-400 hover:text-white">✕</button>
+                </div>
+
+                <div className="py-4 space-y-3">
+                  <span className="text-xs font-bold text-slate-400">プリセット選択</span>
+                  <div className="grid grid-cols-2 gap-2">
+                    {PRESETS.map(p => (
+                      <button
+                        key={p.id}
+                        onClick={() => handleSaveWeights(p.weights)}
+                        className="p-3 rounded-xl border border-slate-800 bg-slate-800/40 hover:bg-slate-800 text-left transition-colors"
+                      >
+                        <div className="text-xs font-bold text-white">{p.name}</div>
+                        <div className="text-[10px] text-slate-400 mt-0.5">{p.desc}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
