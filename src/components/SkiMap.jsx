@@ -1,73 +1,22 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { MapPin, Layers } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 
 /**
- * 完全無料・APIキー不要・世界中どこからでも高速・確実に表示されるタイルレイヤー定義
- * - 地形・山岳 (デフォルト): Esri World Topo Map (日本の山岳起伏・等高線・主要地名・海岸線が鮮明)
- * - 航空写真: Esri World Imagery (世界最高精度の実写衛星・航空写真)
- * - 標準: OpenStreetMap 標準マップ
- * - ダーク: OpenStreetMap + CSSダークフィルター
+ * 高速・安定・完全無料・APIキー不要の標準マップ (Esri World Topo Map)
+ * 日本の山岳等高線・起伏・地名・道路網が高精細に描画される標準ベースマップ
  */
-const TILE_PROVIDERS = {
-  terrain: {
-    name: '地形・山岳',
-    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
-    attribution: 'Tiles &copy; Esri &mdash; Esri, USGS, NOAA',
-    maxZoom: 18
-  },
-  photo: {
-    name: '航空写真',
-    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics',
-    maxZoom: 18
-  },
-  osm: {
-    name: '標準',
-    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    maxZoom: 18
-  },
-  dark: {
-    name: 'ダーク',
-    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    maxZoom: 18
-  }
-};
+const STANDARD_TILE_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}';
+const STANDARD_TILE_ATTRIBUTION = 'Tiles &copy; Esri &mdash; Esri, USGS, NOAA';
 
 /**
- * ゲレンデマップコンポーネント (明るいモダンデザイン)
+ * ゲレンデマップコンポーネント (標準単一マップ・明るいクリーンデザイン)
  */
 export const SkiMap = ({ resortsData = [], onSelectResort }) => {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
-  const tileLayerRef = useRef(null);
   const markersLayerRef = useRef(null);
-  const [mapType, setMapType] = useState('terrain'); // 明るい山岳地形をデフォルトに設定
-
-  // タイル切り替え関数
-  const switchTileLayer = useCallback((map, type) => {
-    if (!map) return;
-    if (tileLayerRef.current) {
-      try {
-        map.removeLayer(tileLayerRef.current);
-      } catch (e) {
-        // ignore
-      }
-      tileLayerRef.current = null;
-    }
-
-    const tileConf = TILE_PROVIDERS[type] || TILE_PROVIDERS.terrain;
-    const newLayer = L.tileLayer(tileConf.url, {
-      attribution: tileConf.attribution,
-      maxZoom: 18,
-      minZoom: 4
-    }).addTo(map);
-
-    tileLayerRef.current = newLayer;
-  }, []);
 
   // マーカー描画関数
   const renderMarkers = useCallback((map, layerGroup, data) => {
@@ -213,8 +162,12 @@ export const SkiMap = ({ resortsData = [], onSelectResort }) => {
 
     mapInstanceRef.current = map;
 
-    // 初回タイルレイヤーを確実に追加
-    switchTileLayer(map, mapType);
+    // 標準タイルレイヤーを追加 (Esri World Topo Map)
+    L.tileLayer(STANDARD_TILE_URL, {
+      attribution: STANDARD_TILE_ATTRIBUTION,
+      maxZoom: 18,
+      minZoom: 4
+    }).addTo(map);
 
     // マーカーレイヤー作成
     const markersLayer = L.layerGroup().addTo(map);
@@ -252,18 +205,9 @@ export const SkiMap = ({ resortsData = [], onSelectResort }) => {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
         markersLayerRef.current = null;
-        tileLayerRef.current = null;
       }
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // タイル切り替えの宣言的同期 (mapType変更時に自動更新)
-  useEffect(() => {
-    if (mapInstanceRef.current) {
-      switchTileLayer(mapInstanceRef.current, mapType);
-      mapInstanceRef.current.invalidateSize();
-    }
-  }, [mapType, switchTileLayer]);
 
   // resortsData 更新時にマーカー再描画
   useEffect(() => {
@@ -286,48 +230,15 @@ export const SkiMap = ({ resortsData = [], onSelectResort }) => {
           </span>
         </div>
 
-        {/* マップスタイル切替 */}
-        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
-          <Layers className="w-3.5 h-3.5 text-slate-500 ml-1.5 mr-0.5" />
-          <button
-            onClick={() => setMapType('terrain')}
-            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
-              mapType === 'terrain' ? 'bg-sky-500 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            地形・山岳
-          </button>
-          <button
-            onClick={() => setMapType('photo')}
-            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
-              mapType === 'photo' ? 'bg-sky-500 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            航空写真
-          </button>
-          <button
-            onClick={() => setMapType('osm')}
-            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
-              mapType === 'osm' ? 'bg-sky-500 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            標準
-          </button>
-          <button
-            onClick={() => setMapType('dark')}
-            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
-              mapType === 'dark' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            ダーク
-          </button>
+        <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
+          <span>❄️ ピンをクリックで詳細レポートを表示</span>
         </div>
       </div>
 
       {/* 地図コンテナ */}
       <div
         ref={mapContainerRef}
-        className={`w-full h-[540px] bg-slate-100 ${mapType === 'dark' ? 'dark-map-tiles' : ''}`}
+        className="w-full h-[540px] bg-slate-100"
         style={{ minHeight: '540px', height: '540px', width: '100%' }}
       />
 

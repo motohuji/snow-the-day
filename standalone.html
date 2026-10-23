@@ -36,7 +36,6 @@
     ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.3); border-radius: 9999px; }
     ::-webkit-scrollbar-thumb:hover { background: rgba(56, 189, 248, 0.6); }
     .custom-ski-pin { background: transparent; border: none; }
-    .dark-map-tiles .leaflet-tile-pane { filter: invert(100%) hue-rotate(180deg) brightness(82%) contrast(92%); }
     /* Leaflet 地図タイル表示崩れ防止 (Tailwind Preflight 競合回避) */
     .leaflet-container img {
       max-width: none !important;
@@ -393,35 +392,11 @@
       );
     };
 
-    // --- フリー地図コンポーネント (OpenStreetMap + Leaflet / 完全無料・APIキー不要) ---
+    // --- フリー地図コンポーネント (Esri World Topo Map / 完全無料・APIキー不要) ---
     function FreeSkiMap({ resorts, onSelectResort }) {
       const mapContainerRef = useRef(null);
       const mapRef = useRef(null);
       const layerGroupRef = useRef(null);
-      const [tileStyle, setTileStyle] = useState('dark');
-
-      const tiles = {
-        dark: {
-          url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-          attr: '&copy; OpenStreetMap contributors',
-          maxNativeZoom: 19
-        },
-        terrain: {
-          url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
-          attr: 'Tiles &copy; Esri &mdash; Esri, USGS, NOAA',
-          maxNativeZoom: 18
-        },
-        photo: {
-          url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-          attr: 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics',
-          maxNativeZoom: 18
-        },
-        osm: {
-          url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-          attr: '&copy; OpenStreetMap contributors',
-          maxNativeZoom: 19
-        }
-      };
 
       useEffect(() => {
         if (!mapContainerRef.current || !window.L) return;
@@ -435,14 +410,17 @@
           });
           mapRef.current = map;
 
-          const initTile = tiles[tileStyle] || tiles.dark;
-          L.tileLayer(initTile.url, {
-            attribution: initTile.attr,
-            maxNativeZoom: initTile.maxNativeZoom || 18,
-            maxZoom: 18
+          L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Esri, USGS, NOAA',
+            maxZoom: 18,
+            minZoom: 4
           }).addTo(map);
 
           layerGroupRef.current = L.layerGroup().addTo(map);
+
+          setTimeout(() => {
+            map.invalidateSize();
+          }, 150);
         }
 
         return () => {
@@ -452,23 +430,6 @@
           }
         };
       }, []);
-
-      // スタイル変更時
-      const switchStyle = (s) => {
-        setTileStyle(s);
-        if (mapRef.current && window.L) {
-          mapRef.current.eachLayer(l => {
-            if (l instanceof L.TileLayer) mapRef.current.removeLayer(l);
-          });
-          const target = tiles[s] || tiles.dark;
-          L.tileLayer(target.url, {
-            attribution: target.attr,
-            maxNativeZoom: target.maxNativeZoom || 18,
-            maxZoom: 18
-          }).addTo(mapRef.current);
-          mapRef.current.invalidateSize();
-        }
-      };
 
       // マーカー描画
       useEffect(() => {
@@ -539,40 +500,17 @@
           <div className="p-4 px-6 bg-slate-950/85 backdrop-blur-md border-b border-slate-800 flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2">
               <span className="text-sky-400 font-bold">📍 全国ゲレンデマップ</span>
-              <span className="text-xs text-emerald-400 font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                完全フリー・APIキー不要 (OpenStreetMap)
+              <span className="text-xs text-sky-400 font-medium px-2 py-0.5 rounded-full bg-sky-500/10 border border-sky-500/20">
+                山岳・地形マップ
               </span>
             </div>
 
-            <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs">
-              <button
-                onClick={() => switchStyle('dark')}
-                className={`px-2.5 py-1 rounded-lg font-bold transition-all ${tileStyle === 'dark' ? 'bg-sky-500 text-slate-950' : 'text-slate-400 hover:text-white'}`}
-              >
-                ダーク
-              </button>
-              <button
-                onClick={() => switchStyle('terrain')}
-                className={`px-2.5 py-1 rounded-lg font-bold transition-all ${tileStyle === 'terrain' ? 'bg-sky-500 text-slate-950' : 'text-slate-400 hover:text-white'}`}
-              >
-                山岳・地形
-              </button>
-              <button
-                onClick={() => switchStyle('photo')}
-                className={`px-2.5 py-1 rounded-lg font-bold transition-all ${tileStyle === 'photo' ? 'bg-sky-500 text-slate-950' : 'text-slate-400 hover:text-white'}`}
-              >
-                航空写真
-              </button>
-              <button
-                onClick={() => switchStyle('osm')}
-                className={`px-2.5 py-1 rounded-lg font-bold transition-all ${tileStyle === 'osm' ? 'bg-sky-500 text-slate-950' : 'text-slate-400 hover:text-white'}`}
-              >
-                標準
-              </button>
+            <div className="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-800">
+              <span>❄️ ピンをクリックで詳細表示</span>
             </div>
           </div>
 
-          <div ref={mapContainerRef} className={`w-full h-[520px] bg-slate-900 ${tileStyle === 'dark' ? 'dark-map-tiles' : ''}`} style={{ zIndex: 1 }} />
+          <div ref={mapContainerRef} className="w-full h-[520px] bg-slate-900" style={{ zIndex: 1 }} />
 
           {/* 凡例 */}
           <div className="absolute bottom-4 left-4 z-[400] p-3 bg-slate-950/90 backdrop-blur-md border border-slate-800 rounded-2xl text-[11px] space-y-1.5 shadow-xl pointer-events-none">

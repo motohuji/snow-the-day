@@ -60,8 +60,3 @@
   margin: 12px 14px;
   line-height: 1.4;
 }
-
-/* Dark mode filter applied ONLY when user toggles dark tile mode */
-.dark-map-tiles .leaflet-tile-pane {
-  filter: invert(100%) hue-rotate(180deg) brightness(82%) contrast(92%);
-}
