@@ -225,9 +225,6 @@ export const SkiMap = ({ resortsData = [], onSelectResort }) => {
           <h3 className="font-bold text-slate-800 text-sm">
             全国ゲレンデマップ ({resortsData.length}箇所)
           </h3>
-          <span className="text-xs text-sky-700 font-medium px-2 py-0.5 rounded-full bg-sky-50 border border-sky-200">
-            完全フリー・APIキー不要
-          </span>
         </div>
 
         <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
