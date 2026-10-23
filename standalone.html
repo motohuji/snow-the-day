@@ -396,13 +396,13 @@
           maxNativeZoom: 19
         },
         terrain: {
-          url: 'https://cyberjapandata.gsi.go.jp/xyz/relief/{z}/{x}/{y}.png',
-          attr: '&copy; 国土地理院 (色別標高図)',
-          maxNativeZoom: 15
+          url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+          attr: 'Tiles &copy; Esri &mdash; Esri, USGS, NOAA',
+          maxNativeZoom: 18
         },
         photo: {
-          url: 'https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg',
-          attr: '&copy; 国土地理院 (航空写真)',
+          url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+          attr: 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics',
           maxNativeZoom: 18
         },
         osm: {

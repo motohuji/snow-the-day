@@ -4,36 +4,35 @@ import 'leaflet/dist/leaflet.css';
 import { MapPin, Layers } from 'lucide-react';
 
 /**
- * 完全無料・APIキー不要・高速かつ安定したタイルレイヤー定義
- * maxNativeZoom を指定することで、高ズーム時でもタイルが消えず拡大表示される
+ * 完全無料・APIキー不要・世界中どこからでも高速・確実に表示されるタイルレイヤー定義
+ * - ダーク: OpenStreetMap + CSSダークフィルター
+ * - 地形・山岳: Esri World Topo Map (山岳陰影・等高線・地名が明瞭で圧倒的な信頼性)
+ * - 航空写真: Esri World Imagery (世界最高精度の実写衛星・航空写真)
+ * - 標準: OpenStreetMap 標準マップ
  */
 const TILE_PROVIDERS = {
   dark: {
     name: 'ダーク',
     url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    maxNativeZoom: 19,
     maxZoom: 18
   },
   terrain: {
     name: '地形・山岳',
-    url: 'https://cyberjapandata.gsi.go.jp/xyz/relief/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://maps.gsi.go.jp/development/ichiran.html">国土地理院</a> (色別標高図)',
-    maxNativeZoom: 15,
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+    attribution: 'Tiles &copy; Esri &mdash; Esri, USGS, NOAA',
     maxZoom: 18
   },
   photo: {
     name: '航空写真',
-    url: 'https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg',
-    attribution: '&copy; <a href="https://maps.gsi.go.jp/development/ichiran.html">国土地理院</a> (航空写真)',
-    maxNativeZoom: 18,
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
     maxZoom: 18
   },
   osm: {
     name: '標準',
     url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    maxNativeZoom: 19,
     maxZoom: 18
   }
 };
@@ -71,7 +70,7 @@ export const SkiMap = ({ resortsData = [], onSelectResort }) => {
             flex-direction: column;
             align-items: center;
             cursor: pointer;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
             transform: translate(-50%, -100%);
           ">
             <div style="
@@ -238,10 +237,8 @@ export const SkiMap = ({ resortsData = [], onSelectResort }) => {
     });
 
     const tileConf = TILE_PROVIDERS[mapType] || TILE_PROVIDERS.dark;
-    const newLayer = L.tileLayer(tileConf.url, {
+    L.tileLayer(tileConf.url, {
       attribution: tileConf.attribution,
-      subdomains: tileConf.subdomains || 'abc',
-      maxNativeZoom: tileConf.maxNativeZoom || 18,
       maxZoom: 18,
       minZoom: 4
     }).addTo(map);
