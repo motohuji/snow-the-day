@@ -37,6 +37,17 @@
     ::-webkit-scrollbar-thumb:hover { background: rgba(56, 189, 248, 0.6); }
     .custom-ski-pin { background: transparent; border: none; }
     .dark-map-tiles .leaflet-tile-pane { filter: invert(100%) hue-rotate(180deg) brightness(82%) contrast(92%); }
+    /* Leaflet 地図タイル表示崩れ防止 (Tailwind Preflight 競合回避) */
+    .leaflet-container img {
+      max-width: none !important;
+      max-height: none !important;
+    }
+    .leaflet-tile {
+      visibility: inherit !important;
+    }
+    .leaflet-tile-pane {
+      z-index: 200 !important;
+    }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen selection:bg-sky-500 selection:text-white font-sans antialiased">

@@ -131,7 +131,7 @@ export default function App() {
   }, [resortDataList]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 pb-20 selection:bg-sky-500 selection:text-white">
+    <div className="min-h-screen bg-slate-100 text-slate-800 pb-20 selection:bg-sky-500 selection:text-white">
       {/* ナビゲーションバー */}
       <Navbar
         weights={weights}
@@ -142,57 +142,57 @@ export default function App() {
       />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-8">
-        {/* ヒーローセクション: Golf the Day 風「本日のBESTゲレンデ」 */}
+        {/* ヒーローセクション: 明るいスノーホワイト＆スカイブルー */}
         {topResort && (
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-sky-950/40 to-slate-900 border border-sky-500/30 p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-white via-sky-50/70 to-white border border-sky-200/90 p-6 sm:p-8 shadow-xl backdrop-blur-xl">
             {/* 背景装飾 */}
-            <div className="absolute top-0 right-1/4 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute top-0 right-1/4 w-96 h-96 bg-sky-400/10 rounded-full blur-3xl pointer-events-none" />
 
             <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-6">
               <div className="space-y-3 max-w-xl text-center lg:text-left">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/20 border border-sky-400/30 text-sky-300 text-xs font-black tracking-wider uppercase">
-                  <Sparkles className="w-3.5 h-3.5" />
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 border border-sky-300 text-sky-700 text-xs font-black tracking-wider uppercase">
+                  <Sparkles className="w-3.5 h-3.5 text-sky-600" />
                   本日の全国最高スコア
                 </div>
 
-                <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+                <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
                   {topResort.resort.name}
                 </h2>
 
-                <div className="flex items-center justify-center lg:justify-start gap-2 text-xs text-slate-300">
-                  <span className="font-semibold text-sky-400">{topResort.resort.prefecture}</span>
+                <div className="flex items-center justify-center lg:justify-start gap-2 text-xs text-slate-600 font-medium">
+                  <span className="font-semibold text-sky-700">{topResort.resort.prefecture}</span>
                   <span>•</span>
                   <span>{topResort.resort.areaName}</span>
                   <span>•</span>
                   <span>標高 {topResort.resort.baseElevation}m〜{topResort.resort.topElevation}m</span>
                 </div>
 
-                <p className="text-sm text-slate-300 leading-relaxed pt-1">
+                <p className="text-sm text-slate-700 leading-relaxed pt-1">
                   {topResort.scoreResult.badge.comment}
                 </p>
 
                 {/* 主要データ */}
                 <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2 text-xs">
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/60">
-                    <Snowflake className="w-4 h-4 text-cyan-400" />
-                    <span>12h新雪: </span>
-                    <strong className="text-cyan-300 font-bold font-outfit">+{topResort.current.freshSnow12h}cm</strong>
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200/90 shadow-sm">
+                    <Snowflake className="w-4 h-4 text-sky-600" />
+                    <span className="text-slate-600">12h新雪: </span>
+                    <strong className="text-sky-700 font-bold font-outfit">+{topResort.current.freshSnow12h}cm</strong>
                   </div>
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/60">
-                    <Mountain className="w-4 h-4 text-indigo-400" />
-                    <span>積雪: </span>
-                    <strong className="text-white font-bold font-outfit">{topResort.current.snowDepthCm}cm</strong>
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200/90 shadow-sm">
+                    <Mountain className="w-4 h-4 text-indigo-600" />
+                    <span className="text-slate-600">積雪: </span>
+                    <strong className="text-slate-900 font-bold font-outfit">{topResort.current.snowDepthCm}cm</strong>
                   </div>
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/60">
-                    <Wind className="w-4 h-4 text-sky-400" />
-                    <span>風速: </span>
-                    <strong className="text-white font-bold font-outfit">{topResort.current.windSpeed}m/s</strong>
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200/90 shadow-sm">
+                    <Wind className="w-4 h-4 text-sky-600" />
+                    <span className="text-slate-600">風速: </span>
+                    <strong className="text-slate-900 font-bold font-outfit">{topResort.current.windSpeed}m/s</strong>
                   </div>
                 </div>
               </div>
 
               {/* 巨大スコアサークル */}
-              <div className="flex items-center gap-6 bg-slate-950/60 p-6 rounded-3xl border border-sky-400/30 shadow-xl">
+              <div className="flex items-center gap-6 bg-white/95 p-6 rounded-3xl border border-sky-200 shadow-lg">
                 <ScoreGauge
                   score={topResort.scoreResult.score}
                   size={140}
@@ -210,12 +210,12 @@ export default function App() {
                   >
                     {topResort.scoreResult.badge.level}
                   </div>
-                  <div className="text-lg font-bold text-white">
+                  <div className="text-lg font-bold text-slate-900">
                     {topResort.scoreResult.badge.title}
                   </div>
                   <button
                     onClick={() => setSelectedResortData(topResort)}
-                    className="flex items-center gap-1 text-xs font-bold text-sky-400 hover:text-sky-300 transition-colors pt-1"
+                    className="flex items-center gap-1 text-xs font-bold text-sky-600 hover:text-sky-800 transition-colors pt-1"
                   >
                     詳細レポートを見る
                     <ChevronRight className="w-4 h-4" />
@@ -238,8 +238,8 @@ export default function App() {
                   onClick={() => setSelectedRegion(reg.id)}
                   className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
                     active
-                      ? 'bg-sky-500 text-slate-950 shadow-lg shadow-sky-500/20 scale-102'
-                      : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800'
+                      ? 'bg-sky-500 text-white shadow-md shadow-sky-500/20 scale-102'
+                      : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200 shadow-sm'
                   }`}
                 >
                   {reg.name}
@@ -249,7 +249,7 @@ export default function App() {
           </div>
 
           {/* 検索・ソート */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-slate-900/60 p-3 rounded-2xl border border-slate-800/80 backdrop-blur-md">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200 shadow-sm backdrop-blur-md">
             {/* 検索入力 */}
             <div className="relative flex-1">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -258,20 +258,20 @@ export default function App() {
                 placeholder="スキー場名・県名・地域名で絞り込み..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400 transition-colors"
+                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:bg-white transition-colors"
               />
             </div>
 
             {/* 表示モード切替 & ソートセレクター */}
             <div className="flex items-center gap-2">
               {/* ビュー切替ボタン */}
-              <div className="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800">
+              <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
                 <button
                   onClick={() => setViewMode('grid')}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                     viewMode === 'grid'
-                      ? 'bg-sky-500 text-slate-950 shadow-md'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-sky-500 text-white shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   <LayoutGrid className="w-3.5 h-3.5" />
@@ -281,8 +281,8 @@ export default function App() {
                   onClick={() => setViewMode('map')}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                     viewMode === 'map'
-                      ? 'bg-sky-500 text-slate-950 shadow-md'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-sky-500 text-white shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   <MapPin className="w-3.5 h-3.5" />
@@ -290,14 +290,14 @@ export default function App() {
                 </button>
               </div>
 
-              <span className="text-xs text-slate-400 hidden md:flex items-center gap-1 whitespace-nowrap pl-1">
-                <ArrowUpDown className="w-3.5 h-3.5 text-sky-400" />
+              <span className="text-xs text-slate-500 hidden md:flex items-center gap-1 whitespace-nowrap pl-1 font-medium">
+                <ArrowUpDown className="w-3.5 h-3.5 text-sky-600" />
                 並び順:
               </span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="bg-slate-950/80 border border-slate-800 text-xs font-semibold text-slate-200 py-2 px-3 rounded-xl focus:outline-none focus:border-sky-400 cursor-pointer"
+                className="bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700 py-2 px-3 rounded-xl focus:outline-none focus:border-sky-500 cursor-pointer shadow-sm"
               >
                 <option value="score">🏆 総合スコア順 (おすすめ)</option>
                 <option value="freshSnow">❄️ 12h新雪量順</option>
@@ -319,51 +319,51 @@ export default function App() {
           </div>
         ) : (
           <div>
-            <div className="flex items-center justify-between text-xs text-slate-400 mb-4 px-1">
+            <div className="flex items-center justify-between text-xs text-slate-500 mb-4 px-1">
               <span>
-                該当スキー場: <strong className="text-white font-bold">{filteredAndSortedResorts.length}</strong> 件
+                該当スキー場: <strong className="text-slate-800 font-bold">{filteredAndSortedResorts.length}</strong> 件
               </span>
-              <span className="text-[11px] text-slate-500">
+              <span className="text-[11px] text-slate-400">
                 ※カードをクリックすると時間別グラフと7日間予測を表示
               </span>
             </div>
 
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div
-                  key={i}
-                  className="h-72 rounded-2xl bg-slate-900/40 border border-slate-800 animate-pulse p-6 flex flex-col justify-between"
-                >
-                  <div className="space-y-3">
-                    <div className="h-4 bg-slate-800 rounded w-1/3" />
-                    <div className="h-6 bg-slate-800 rounded w-2/3" />
+            {loading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div
+                    key={i}
+                    className="h-72 rounded-2xl bg-white border border-slate-200 animate-pulse p-6 flex flex-col justify-between shadow-sm"
+                  >
+                    <div className="space-y-3">
+                      <div className="h-4 bg-slate-100 rounded w-1/3" />
+                      <div className="h-6 bg-slate-200 rounded w-2/3" />
+                    </div>
+                    <div className="h-20 bg-slate-100 rounded-xl" />
+                    <div className="h-8 bg-slate-100 rounded-xl" />
                   </div>
-                  <div className="h-20 bg-slate-800/60 rounded-xl" />
-                  <div className="h-8 bg-slate-800/40 rounded-xl" />
-                </div>
-              ))}
-            </div>
-          ) : filteredAndSortedResorts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {filteredAndSortedResorts.map((item) => (
-                <ResortCard
-                  key={item.resort.id}
-                  data={item}
-                  onSelect={(d) => setSelectedResortData(d)}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-16 bg-slate-900/40 border border-slate-800 rounded-3xl">
-              <Snowflake className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-              <p className="text-sm font-bold text-slate-300">該当するスキー場が見つかりませんでした</p>
-              <p className="text-xs text-slate-500 mt-1">検索キーワードまたは地域条件を変更してください</p>
-            </div>
-          )}
-        </div>
-      )}
-    </main>
+                ))}
+              </div>
+            ) : filteredAndSortedResorts.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {filteredAndSortedResorts.map((item) => (
+                  <ResortCard
+                    key={item.resort.id}
+                    data={item}
+                    onSelect={(d) => setSelectedResortData(d)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16 bg-white border border-slate-200 rounded-3xl shadow-sm">
+                <Snowflake className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                <p className="text-sm font-bold text-slate-700">該当するスキー場が見つかりませんでした</p>
+                <p className="text-xs text-slate-400 mt-1">検索キーワードまたは地域条件を変更してください</p>
+              </div>
+            )}
+          </div>
+        )}
+      </main>
 
       {/* 詳細モーダル */}
       {selectedResortData && (
