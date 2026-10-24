@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { REGIONS, RESORTS } from './data/resorts';
 import { PRESETS } from './utils/scoring';
-import { fetchResortWeather } from './utils/weatherApi';
+import { fetchResortWeather, fetchAllResortsWeather } from './utils/weatherApi';
 import { Navbar } from './components/Navbar';
 import { ResortCard } from './components/ResortCard';
 import { DetailModal } from './components/DetailModal';
@@ -52,9 +52,8 @@ export default function App() {
     setRefreshing(true);
 
     try {
-      // 全スキー場の天気を並列取得（Open-Meteoは無料・レート制限余裕あり）
-      const promises = RESORTS.map((resort) => fetchResortWeather(resort, currentWeights));
-      const results = await Promise.all(promises);
+      // 全スキー場の天気を高速バッチ取得 (Open-Meteo Multi-location API)
+      const results = await fetchAllResortsWeather(RESORTS, currentWeights);
       setResortDataList(results);
       setLastUpdated(new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }));
     } catch (err) {

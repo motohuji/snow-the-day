@@ -1,16 +1,18 @@
 export const REGIONS = [
   { id: 'all', name: '全エリア' },
   { id: 'hokkaido', name: '北海道' },
+  { id: 'tohoku', name: '東北' },
   { id: 'nagano', name: '長野' },
   { id: 'niigata', name: '新潟' },
-  { id: 'gunma', name: '群馬' },
-  { id: 'fukushima', name: '福島' },
-  { id: 'miyagi', name: '宮城' },
-  { id: 'shizuoka', name: '静岡' }
+  { id: 'kanto_koshin', name: '群馬・栃木・山梨' },
+  { id: 'chubu_hokuriku', name: '中部・北陸' },
+  { id: 'west_japan', name: '西日本' }
 ];
 
 export const RESORTS = [
-  // 北海道
+  // ==========================================
+  // 1. 北海道 (12 resorts)
+  // ==========================================
   {
     id: 'niseko-grand-hirafu',
     name: 'ニセコ東急 グラン・ヒラフ',
@@ -24,6 +26,42 @@ export const RESORTS = [
     tag: '極上パウダースノー'
   },
   {
+    id: 'niseko-hanazono',
+    name: 'ニセコHANAZONOリゾート',
+    region: 'hokkaido',
+    prefecture: '北海道',
+    areaName: '倶知安町 / ニセコ',
+    lat: 42.8833,
+    lng: 140.7167,
+    topElevation: 1040,
+    baseElevation: 308,
+    tag: 'ツリーラン・テレインパーク'
+  },
+  {
+    id: 'niseko-village',
+    name: 'ニセコビレッジスキーリゾート',
+    region: 'hokkaido',
+    prefecture: '北海道',
+    areaName: 'ニセコ町',
+    lat: 42.8453,
+    lng: 140.6869,
+    topElevation: 1170,
+    baseElevation: 280,
+    tag: 'ロングパウダークルージング'
+  },
+  {
+    id: 'niseko-annupuri',
+    name: 'ニセコアンヌプリ国際スキー場',
+    region: 'hokkaido',
+    prefecture: '北海道',
+    areaName: 'ニセコ町',
+    lat: 42.8592,
+    lng: 140.6558,
+    topElevation: 1156,
+    baseElevation: 400,
+    tag: 'ワイドバーン・ファミリー'
+  },
+  {
     id: 'rusutsu-resort',
     name: 'ルスツリゾート',
     region: 'hokkaido',
@@ -33,7 +71,7 @@ export const RESORTS = [
     lng: 140.9067,
     topElevation: 994,
     baseElevation: 400,
-    tag: '道内最大級・ツリーラン'
+    tag: '道内最大級・3山コース'
   },
   {
     id: 'furano-ski-resort',
@@ -47,8 +85,278 @@ export const RESORTS = [
     baseElevation: 235,
     tag: '内陸ドライパウダー'
   },
+  {
+    id: 'hoshino-tomamu',
+    name: '星野リゾート トマム',
+    region: 'hokkaido',
+    prefecture: '北海道',
+    areaName: '占冠村',
+    lat: 43.0644,
+    lng: 142.6178,
+    topElevation: 1239,
+    baseElevation: 540,
+    tag: '氷点下20度の極上雪・タワー'
+  },
+  {
+    id: 'kiroro-snow-world',
+    name: 'キロロスノーワールド',
+    region: 'hokkaido',
+    prefecture: '北海道',
+    areaName: '赤井川村',
+    lat: 43.0736,
+    lng: 141.0117,
+    topElevation: 1180,
+    baseElevation: 570,
+    tag: '豪雪・圧倒的ディープパウダー'
+  },
+  {
+    id: 'sapporo-teine',
+    name: 'サッポロテイネ',
+    region: 'hokkaido',
+    prefecture: '北海道',
+    areaName: '札幌市手稲区',
+    lat: 43.0847,
+    lng: 141.2008,
+    topElevation: 1023,
+    baseElevation: 340,
+    tag: 'オリンピックコース・札幌近郊'
+  },
+  {
+    id: 'sapporo-kokusai',
+    name: '札幌国際スキー場',
+    region: 'hokkaido',
+    prefecture: '北海道',
+    areaName: '札幌市南区',
+    lat: 43.0722,
+    lng: 141.0856,
+    topElevation: 1100,
+    baseElevation: 630,
+    tag: '積雪量豊富・ロングシーズン'
+  },
+  {
+    id: 'kamui-ski-links',
+    name: 'カムイスキーリンクス',
+    region: 'hokkaido',
+    prefecture: '北海道',
+    areaName: '旭川市',
+    lat: 43.7225,
+    lng: 142.1931,
+    topElevation: 751,
+    baseElevation: 150,
+    tag: '道北最大級・ゴールドコース'
+  },
+  {
+    id: 'asahidake',
+    name: '大雪山旭岳ロープウェイ',
+    region: 'hokkaido',
+    prefecture: '北海道',
+    areaName: '東川町',
+    lat: 43.6631,
+    lng: 142.8258,
+    topElevation: 1600,
+    baseElevation: 1100,
+    tag: '日本屈指のバックカントリー聖地'
+  },
 
-  // 長野
+  // ==========================================
+  // 2. 東北 (16 resorts)
+  // ==========================================
+  {
+    id: 'hakkoda',
+    name: '八甲田スキー場',
+    region: 'tohoku',
+    prefecture: '青森県',
+    areaName: '青森市',
+    lat: 40.6517,
+    lng: 140.8525,
+    topElevation: 1324,
+    baseElevation: 659,
+    tag: '樹氷原生林・豪雪パウダー'
+  },
+  {
+    id: 'aomori-spring',
+    name: '青森スプリング・スキーリゾート',
+    region: 'tohoku',
+    prefecture: '青森県',
+    areaName: '鰺ヶ沢町',
+    lat: 40.6792,
+    lng: 140.2392,
+    topElevation: 921,
+    baseElevation: 180,
+    tag: '岩木山北斜面・ハーフパイプ'
+  },
+  {
+    id: 'appi-kogen',
+    name: '安比高原スキー場',
+    region: 'tohoku',
+    prefecture: '岩手県',
+    areaName: '八幡平市',
+    lat: 40.0006,
+    lng: 140.9708,
+    topElevation: 1304,
+    baseElevation: 504,
+    tag: 'APPIシルキースノー・東北最大級'
+  },
+  {
+    id: 'geto-kogen',
+    name: '夏油高原スキー場',
+    region: 'tohoku',
+    prefecture: '岩手県',
+    areaName: '北上市',
+    lat: 39.2136,
+    lng: 140.7547,
+    topElevation: 1070,
+    baseElevation: 640,
+    tag: '積雪日本一クラス・ツリーランゾーン'
+  },
+  {
+    id: 'hachimantai-shimokura',
+    name: '八幡平リゾート 下倉スキー場',
+    region: 'tohoku',
+    prefecture: '岩手県',
+    areaName: '八幡平市',
+    lat: 39.8883,
+    lng: 140.9736,
+    topElevation: 1130,
+    baseElevation: 550,
+    tag: 'ウルトラノースパウダー・急斜面壁'
+  },
+  {
+    id: 'shizukuishi',
+    name: '雫石スキー場',
+    region: 'tohoku',
+    prefecture: '岩手県',
+    areaName: '雫石町',
+    lat: 39.7719,
+    lng: 140.9325,
+    topElevation: 1209,
+    baseElevation: 404,
+    tag: '世界選手権開催・ロングコース'
+  },
+  {
+    id: 'tazawako',
+    name: 'たざわ湖スキー場',
+    region: 'tohoku',
+    prefecture: '秋田県',
+    areaName: '仙北市',
+    lat: 39.7578,
+    lng: 140.7417,
+    topElevation: 1186,
+    baseElevation: 578,
+    tag: '田沢湖を望む絶景・モーグル聖地'
+  },
+  {
+    id: 'ani-ski-resort',
+    name: '阿仁スキー場',
+    region: 'tohoku',
+    prefecture: '秋田県',
+    areaName: '北秋田市',
+    lat: 39.9839,
+    lng: 140.5283,
+    topElevation: 1200,
+    baseElevation: 540,
+    tag: '森吉山の樹氷群・シルキーパウダー'
+  },
+  {
+    id: 'yamagata-zao',
+    name: '山形蔵王温泉スキー場',
+    region: 'tohoku',
+    prefecture: '山形県',
+    areaName: '山形市',
+    lat: 38.1633,
+    lng: 140.4089,
+    topElevation: 1661,
+    baseElevation: 780,
+    tag: '日本最大級・名物樹氷モンスター'
+  },
+  {
+    id: 'tengendai',
+    name: '天元台高原',
+    region: 'tohoku',
+    prefecture: '山形県',
+    areaName: '米沢市',
+    lat: 37.8106,
+    lng: 140.1172,
+    topElevation: 1820,
+    baseElevation: 1350,
+    tag: '標高1800m本州トップ級雪質'
+  },
+  {
+    id: 'gassan',
+    name: '月山スキー場',
+    region: 'tohoku',
+    prefecture: '山形県',
+    areaName: '西川町',
+    lat: 38.5292,
+    lng: 140.0381,
+    topElevation: 1600,
+    baseElevation: 1220,
+    tag: '4月〜7月のサマースキー聖地'
+  },
+  {
+    id: 'miyagi-zao-eboshi',
+    name: 'みやぎ蔵王えぼしリゾート',
+    region: 'tohoku',
+    prefecture: '宮城県',
+    areaName: '蔵王町',
+    lat: 38.1389,
+    lng: 140.5283,
+    topElevation: 1350,
+    baseElevation: 600,
+    tag: '宮城最大級・蔵王連峰一望'
+  },
+  {
+    id: 'spring-valley-sendai',
+    name: 'スプリングバレー仙台泉',
+    region: 'tohoku',
+    prefecture: '宮城県',
+    areaName: '仙台市泉区',
+    lat: 38.4172,
+    lng: 140.7183,
+    topElevation: 950,
+    baseElevation: 687,
+    tag: '仙台近郊・パーク充実'
+  },
+  {
+    id: 'nekoma-mountain',
+    name: '星野リゾート ネコマ マウンテン',
+    region: 'tohoku',
+    prefecture: '福島県',
+    areaName: '磐梯町 / 北塩原村',
+    lat: 37.6083,
+    lng: 140.0525,
+    topElevation: 1338,
+    baseElevation: 680,
+    tag: '南北連結ビッグゲレンデ・微粒子雪'
+  },
+  {
+    id: 'grandeco',
+    name: 'グランデコスノーリゾート',
+    region: 'tohoku',
+    prefecture: '福島県',
+    areaName: '北塩原村',
+    lat: 37.6975,
+    lng: 140.1194,
+    topElevation: 1590,
+    baseElevation: 1010,
+    tag: '標高1000m超・神雪パウダースノー'
+  },
+  {
+    id: 'aizukogen-daikura',
+    name: '会津高原だいくらスキー場',
+    region: 'tohoku',
+    prefecture: '福島県',
+    areaName: '南会津町',
+    lat: 37.1642,
+    lng: 139.6972,
+    topElevation: 1200,
+    baseElevation: 700,
+    tag: '会津の良質雪・開放感あるワイドバーン'
+  },
+
+  // ==========================================
+  // 3. 長野 (20 resorts)
+  // ==========================================
   {
     id: 'hakuba-happo-one',
     name: '白馬八方尾根スキー場',
@@ -59,7 +367,67 @@ export const RESORTS = [
     lng: 137.8436,
     topElevation: 1831,
     baseElevation: 760,
-    tag: '国内最高峰のビッグゲレンデ'
+    tag: '国内最高峰ビッグゲレンデ'
+  },
+  {
+    id: 'hakuba-goryu47',
+    name: '白馬五竜＆Hakuba47',
+    region: 'nagano',
+    prefecture: '長野県',
+    areaName: '白馬村',
+    lat: 36.6667,
+    lng: 137.8383,
+    topElevation: 1676,
+    baseElevation: 750,
+    tag: 'パーク充実＆絶景アルプス'
+  },
+  {
+    id: 'hakuba-iwatake',
+    name: '白馬岩岳スノーフィールド',
+    region: 'nagano',
+    prefecture: '長野県',
+    areaName: '白馬村',
+    lat: 36.7214,
+    lng: 137.8636,
+    topElevation: 1289,
+    baseElevation: 750,
+    tag: '360度パノラマ・パウンウンテン'
+  },
+  {
+    id: 'tsugaike-kogen',
+    name: '栂池高原スキー場',
+    region: 'nagano',
+    prefecture: '長野県',
+    areaName: '小谷村',
+    lat: 36.7583,
+    lng: 137.8708,
+    topElevation: 1704,
+    baseElevation: 800,
+    tag: '鐘の鳴る丘・広大ビギナー天国'
+  },
+  {
+    id: 'hakuba-cortina',
+    name: '白馬コルチナスキー場',
+    region: 'nagano',
+    prefecture: '長野県',
+    areaName: '小谷村',
+    lat: 36.7978,
+    lng: 137.8872,
+    topElevation: 1402,
+    baseElevation: 872,
+    tag: '天然100%超豪雪・ツリーラン'
+  },
+  {
+    id: 'hakuba-norikura',
+    name: '白馬乗鞍温泉スキー場',
+    region: 'nagano',
+    prefecture: '長野県',
+    areaName: '小谷村',
+    lat: 36.7869,
+    lng: 137.8819,
+    topElevation: 1300,
+    baseElevation: 700,
+    tag: '若栗ゲレンデ・天然温泉直結'
   },
   {
     id: 'nozawa-onsen',
@@ -71,7 +439,7 @@ export const RESORTS = [
     lng: 138.4500,
     topElevation: 1650,
     baseElevation: 565,
-    tag: '豪雪＆天然温泉街'
+    tag: '豪雪＆天然温泉街・毛無山トップ'
   },
   {
     id: 'shiga-kogen-yakebitai',
@@ -83,7 +451,79 @@ export const RESORTS = [
     lng: 138.5283,
     topElevation: 2009,
     baseElevation: 1550,
-    tag: '標高2000m・超高品質スノー'
+    tag: '標高2000m・超高品質プラチナパウダー'
+  },
+  {
+    id: 'shiga-kogen-ichinose',
+    name: '志賀高原 一の瀬ファミリー',
+    region: 'nagano',
+    prefecture: '長野県',
+    areaName: '山ノ内町',
+    lat: 36.7333,
+    lng: 138.5167,
+    topElevation: 1900,
+    baseElevation: 1610,
+    tag: '志賀高原の中心・広大緩斜面'
+  },
+  {
+    id: 'shiga-kogen-kumanoyu',
+    name: '志賀高原 熊の湯スキー場',
+    region: 'nagano',
+    prefecture: '長野県',
+    areaName: '山ノ内町',
+    lat: 36.7022,
+    lng: 138.5308,
+    topElevation: 1960,
+    baseElevation: 1690,
+    tag: '北斜面パウダースノー・春までロング'
+  },
+  {
+    id: 'shiga-kogen-yokoteyama',
+    name: '志賀高原 横手山・渋峠スキー場',
+    region: 'nagano',
+    prefecture: '長野県',
+    areaName: '山ノ内町',
+    lat: 36.6719,
+    lng: 138.5292,
+    topElevation: 2307,
+    baseElevation: 1705,
+    tag: '日本一標高の高いスキー場 2307m'
+  },
+  {
+    id: 'madarao-kogen',
+    name: '斑尾高原スキー場',
+    region: 'nagano',
+    prefecture: '長野県',
+    areaName: '飯山市',
+    lat: 36.8833,
+    lng: 138.3000,
+    topElevation: 1382,
+    baseElevation: 910,
+    tag: 'マダパウ・日本一のツリーランコース数'
+  },
+  {
+    id: 'togakushi',
+    name: '戸隠スキー場',
+    region: 'nagano',
+    prefecture: '長野県',
+    areaName: '長野市',
+    lat: 36.7681,
+    lng: 138.0833,
+    topElevation: 1748,
+    baseElevation: 1200,
+    tag: '魔法の粉雪「メノウパウダー」'
+  },
+  {
+    id: 'sugadaira-kogen',
+    name: '菅平高原スノーリゾート',
+    region: 'nagano',
+    prefecture: '長野県',
+    areaName: '上田市',
+    lat: 36.5417,
+    lng: 138.3333,
+    topElevation: 1650,
+    baseElevation: 1250,
+    tag: '本州屈指の極寒・ダイヤモンドダスト'
   },
   {
     id: 'karuizawa-prince',
@@ -95,10 +535,72 @@ export const RESORTS = [
     lng: 138.6319,
     topElevation: 1155,
     baseElevation: 940,
-    tag: '晴天率高・アクセス抜群'
+    tag: '晴天率高・アクセス抜群新幹線直結'
+  },
+  {
+    id: 'yunomaru',
+    name: '湯の丸スキー場',
+    region: 'nagano',
+    prefecture: '長野県',
+    areaName: '東御市',
+    lat: 36.4356,
+    lng: 138.4069,
+    topElevation: 1965,
+    baseElevation: 1700,
+    tag: '標高1700m・パウダースノー王国'
+  },
+  {
+    id: 'kurumayama-skypark',
+    name: '車山高原SKYPARKスキー場',
+    region: 'nagano',
+    prefecture: '長野県',
+    areaName: '茅野市',
+    lat: 36.1039,
+    lng: 138.1969,
+    topElevation: 1925,
+    baseElevation: 1560,
+    tag: '晴天率80%・八ヶ岳富士山大パノラマ'
+  },
+  {
+    id: 'shirakabako-royal-hill',
+    name: '白樺湖ロイヤルヒル',
+    region: 'nagano',
+    prefecture: '長野県',
+    areaName: '茅野市',
+    lat: 36.1264,
+    lng: 138.2392,
+    topElevation: 1630,
+    baseElevation: 1450,
+    tag: 'ナイター毎日営業・湖畔リゾート'
+  },
+  {
+    id: 'fujimi-panorama',
+    name: '富士見パノラマリゾート',
+    region: 'nagano',
+    prefecture: '長野県',
+    areaName: '富士見町',
+    lat: 35.9103,
+    lng: 138.1639,
+    topElevation: 1780,
+    baseElevation: 1050,
+    tag: 'ゴンドラ1本で3000mロング滑走'
+  },
+  {
+    id: 'ontake-2240',
+    name: 'おんたけ2240',
+    region: 'nagano',
+    prefecture: '長野県',
+    areaName: '王滝村',
+    lat: 35.8614,
+    lng: 137.5258,
+    topElevation: 2240,
+    baseElevation: 1570,
+    tag: '御嶽山標高2240m・天然パウダー'
   },
 
-  // 新潟
+  // ==========================================
+  // 4. 新潟 (16 resorts)
+  // ==========================================
   {
     id: 'naeba',
     name: '苗場スキー場',
@@ -112,6 +614,18 @@ export const RESORTS = [
     tag: 'ビッグスケール＆ドラゴンドラ'
   },
   {
+    id: 'kagura',
+    name: 'かぐらスキー場',
+    region: 'niigata',
+    prefecture: '新潟県',
+    areaName: '湯沢町',
+    lat: 36.8583,
+    lng: 138.7750,
+    topElevation: 1845,
+    baseElevation: 620,
+    tag: '11月〜5月下旬ロング・本流豪雪パウダー'
+  },
+  {
     id: 'gala-yuzawa',
     name: 'GALA湯沢スキー場',
     region: 'niigata',
@@ -121,7 +635,103 @@ export const RESORTS = [
     lng: 138.7981,
     topElevation: 1181,
     baseElevation: 358,
-    tag: '新幹線駅直結'
+    tag: '新幹線改札口直結スキーセンター'
+  },
+  {
+    id: 'yuzawa-kogen',
+    name: '湯沢高原スキー場',
+    region: 'niigata',
+    prefecture: '新潟県',
+    areaName: '湯沢町',
+    lat: 36.9389,
+    lng: 138.7994,
+    topElevation: 1170,
+    baseElevation: 380,
+    tag: '世界最大級ロープウェイ・越後山脈一望'
+  },
+  {
+    id: 'naspa-ski-garden',
+    name: 'NASPAスキーガーデン',
+    region: 'niigata',
+    prefecture: '新潟県',
+    areaName: '湯沢町',
+    lat: 36.9278,
+    lng: 138.8056,
+    topElevation: 690,
+    baseElevation: 430,
+    tag: 'スキー専用ゲレンデ・安心リゾート'
+  },
+  {
+    id: 'kandatsu-snow-resort',
+    name: '神立スノーリゾート',
+    region: 'niigata',
+    prefecture: '新潟県',
+    areaName: '湯沢町',
+    lat: 36.9167,
+    lng: 138.8250,
+    topElevation: 1000,
+    baseElevation: 460,
+    tag: '100%天然雪・夜通しナイター'
+  },
+  {
+    id: 'yuzawa-nakazato',
+    name: '湯沢中里スノーリゾート',
+    region: 'niigata',
+    prefecture: '新潟県',
+    areaName: '湯沢町',
+    lat: 36.9167,
+    lng: 138.8472,
+    topElevation: 702,
+    baseElevation: 458,
+    tag: 'ブルートレイン休憩所・ファミリー人気'
+  },
+  {
+    id: 'iwappara',
+    name: '岩原スキー場',
+    region: 'niigata',
+    prefecture: '新潟県',
+    areaName: '湯沢町',
+    lat: 36.9367,
+    lng: 138.8319,
+    topElevation: 985,
+    baseElevation: 400,
+    tag: '幅広ワイド緩斜面・見晴らし抜群'
+  },
+  {
+    id: 'maiko-snow-resort',
+    name: '舞子スノーリゾート',
+    region: 'niigata',
+    prefecture: '新潟県',
+    areaName: '南魚沼市',
+    lat: 37.0139,
+    lng: 138.8250,
+    topElevation: 920,
+    baseElevation: 260,
+    tag: '塩沢石打IC1分・3エリア26コース'
+  },
+  {
+    id: 'joetsu-kokusai',
+    name: '上越国際スキー場',
+    region: 'niigata',
+    prefecture: '新潟県',
+    areaName: '南魚沼市',
+    lat: 37.0361,
+    lng: 138.8306,
+    topElevation: 1017,
+    baseElevation: 200,
+    tag: '東京ドーム214個分メガリゾート'
+  },
+  {
+    id: 'hakkaisan',
+    name: '六日町八海山スキー場',
+    region: 'niigata',
+    prefecture: '新潟県',
+    areaName: '南魚沼市',
+    lat: 37.1000,
+    lng: 138.9917,
+    topElevation: 1147,
+    baseElevation: 356,
+    tag: 'ロープウェイ急斜面・エキスパート聖地'
   },
   {
     id: 'myoko-suginohara',
@@ -133,7 +743,7 @@ export const RESORTS = [
     lng: 138.1639,
     topElevation: 1855,
     baseElevation: 731,
-    tag: '最長滑走距離8,500m'
+    tag: '最長滑走距離8,500m・妙高山麓'
   },
   {
     id: 'akakura-kanko',
@@ -145,110 +755,438 @@ export const RESORTS = [
     lng: 138.1817,
     topElevation: 1500,
     baseElevation: 740,
-    tag: '伝統リゾート＆極上雪質'
+    tag: '伝統リゾートホテル＆極上非圧雪'
+  },
+  {
+    id: 'akakura-onsen',
+    name: '赤倉温泉スキー場',
+    region: 'niigata',
+    prefecture: '新潟県',
+    areaName: '妙高市',
+    lat: 36.9039,
+    lng: 138.1883,
+    topElevation: 1200,
+    baseElevation: 650,
+    tag: '妙高名湯直結・ワイドオープンバーン'
+  },
+  {
+    id: 'lotte-arai-resort',
+    name: 'ロッテアライリゾート',
+    region: 'niigata',
+    prefecture: '新潟県',
+    areaName: '妙高市',
+    lat: 37.0250,
+    lng: 138.2000,
+    topElevation: 1280,
+    baseElevation: 329,
+    tag: '圧倒的豪雪フリーライド天国'
+  },
+  {
+    id: 'charmant-hiuchi',
+    name: 'シャルマン火打スキー場',
+    region: 'niigata',
+    prefecture: '新潟県',
+    areaName: '糸魚川市',
+    lat: 37.0000,
+    lng: 138.0000,
+    topElevation: 1009,
+    baseElevation: 501,
+    tag: '非圧雪65%・日本海のスーパーパウダー'
   },
 
-  // 群馬
+  // ==========================================
+  // 5. 群馬・栃木・山梨 (12 resorts)
+  // ==========================================
   {
     id: 'kawaba',
     name: '川場スキー場',
-    region: 'gunma',
+    region: 'kanto_koshin',
     prefecture: '群馬県',
     areaName: '川場村',
     lat: 36.7761,
     lng: 139.1172,
     topElevation: 1870,
     baseElevation: 1290,
-    tag: '立体駐車場直結・オフピステ'
+    tag: '立体駐車場直結・上質な天然パウダー'
   },
   {
     id: 'marunuma-kogen',
     name: '丸沼高原スキー場',
-    region: 'gunma',
+    region: 'kanto_koshin',
     prefecture: '群馬県',
     areaName: '片品村',
     lat: 36.8336,
     lng: 139.3364,
     topElevation: 2000,
     baseElevation: 1400,
-    tag: '標高2000m・日光白根の絶景'
+    tag: '標高2000m・日光白根の極上パウダー'
   },
   {
     id: 'manza-onsen',
     name: '万座温泉スキー場',
-    region: 'gunma',
+    region: 'kanto_koshin',
     prefecture: '群馬県',
     areaName: '嬬恋村',
     lat: 36.6347,
     lng: 138.5131,
     topElevation: 1990,
     baseElevation: 1646,
-    tag: '国内屈指の粉雪＆名湯'
-  },
-
-  // 福島
-  {
-    id: 'nekoma-mountain',
-    name: '星野リゾート ネコマ マウンテン',
-    region: 'fukushima',
-    prefecture: '福島県',
-    areaName: '磐梯町 / 北塩原村',
-    lat: 37.6083,
-    lng: 140.0525,
-    topElevation: 1338,
-    baseElevation: 680,
-    tag: '南北連結ビッグゲレンデ'
+    tag: '粉雪の万座パウダー＆名湯白濁温泉'
   },
   {
-    id: 'grandeco',
-    name: 'グランデコスノーリゾート',
-    region: 'fukushima',
-    prefecture: '福島県',
-    areaName: '北塩原村',
-    lat: 37.6975,
-    lng: 140.1194,
-    topElevation: 1590,
-    baseElevation: 1010,
-    tag: '神雪パウダースノー'
+    id: 'hodaigi',
+    name: '水上宝台樹スキー場',
+    region: 'kanto_koshin',
+    prefecture: '群馬県',
+    areaName: 'みなかみ町',
+    lat: 36.8333,
+    lng: 139.0667,
+    topElevation: 1400,
+    baseElevation: 830,
+    tag: 'みなかみ屈指の豪雪・多彩な16コース'
   },
-
-  // 宮城
   {
-    id: 'miyagi-zao-eboshi',
-    name: 'みやぎ蔵王えぼしリゾート',
-    region: 'miyagi',
-    prefecture: '宮城県',
-    areaName: '蔵王町',
-    lat: 38.1389,
-    lng: 140.5283,
+    id: 'tambara',
+    name: 'たんばらスキーパーク',
+    region: 'kanto_koshin',
+    prefecture: '群馬県',
+    areaName: '沼田市',
+    lat: 36.7867,
+    lng: 139.0683,
+    topElevation: 1550,
+    baseElevation: 1250,
+    tag: '首都圏から近い北海道並みサラサラ雪'
+  },
+  {
+    id: 'oze-tokura',
+    name: 'スノーパーク尾瀬戸倉',
+    region: 'kanto_koshin',
+    prefecture: '群馬県',
+    areaName: '片品村',
+    lat: 36.8483,
+    lng: 139.2611,
+    topElevation: 1408,
+    baseElevation: 998,
+    tag: '本格フリーライド＆スノーボードパーク'
+  },
+  {
+    id: 'oze-iwakura',
+    name: 'ホワイトワールド尾瀬岩鞍',
+    region: 'kanto_koshin',
+    prefecture: '群馬県',
+    areaName: '片品村',
+    lat: 36.8242,
+    lng: 139.2319,
+    topElevation: 1703,
+    baseElevation: 1005,
+    tag: '関東最大級・全16コース本格ゲレンデ'
+  },
+  {
+    id: 'kusatsu-onsen',
+    name: '草津温泉スキー場',
+    region: 'kanto_koshin',
+    prefecture: '群馬県',
+    areaName: '草津町',
+    lat: 36.6389,
+    lng: 138.5833,
+    topElevation: 1600,
+    baseElevation: 1245,
+    tag: '名湯草津・天狗山ゲレンデ'
+  },
+  {
+    id: 'hunter-mountain',
+    name: 'ハンターマウンテン塩原',
+    region: 'kanto_koshin',
+    prefecture: '栃木県',
+    areaName: '那須塩原市',
+    lat: 36.9536,
+    lng: 139.7758,
+    topElevation: 1638,
+    baseElevation: 1138,
+    tag: '首都圏最大級・3,000mダウンヒル'
+  },
+  {
+    id: 'edelweiss',
+    name: 'エーデルワイス スキーリゾート',
+    region: 'kanto_koshin',
+    prefecture: '栃木県',
+    areaName: '日光市',
+    lat: 36.9458,
+    lng: 139.7569,
     topElevation: 1350,
-    baseElevation: 600,
-    tag: '宮城最大級・蔵王連峰一望'
+    baseElevation: 970,
+    tag: '日光国立公園・ファミリーに最適'
   },
   {
-    id: 'spring-valley-sendai',
-    name: 'スプリングバレー仙台泉',
-    region: 'miyagi',
-    prefecture: '宮城県',
-    areaName: '仙台市泉区',
-    lat: 38.4172,
-    lng: 140.7183,
-    topElevation: 950,
-    baseElevation: 687,
-    tag: '仙台近郊・パーク充実'
+    id: 'fujiten',
+    name: 'ふじてんスノーリゾート',
+    region: 'kanto_koshin',
+    prefecture: '山梨県',
+    areaName: '鳴沢村',
+    lat: 35.3986,
+    lng: 138.6947,
+    topElevation: 1500,
+    baseElevation: 1300,
+    tag: '富士山一望・中央道河口湖ICすぐ'
+  },
+  {
+    id: 'kamui-misaka',
+    name: 'カムイみさかスキー場',
+    region: 'kanto_koshin',
+    prefecture: '山梨県',
+    areaName: '笛吹市',
+    lat: 35.5892,
+    lng: 138.7069,
+    topElevation: 1100,
+    baseElevation: 860,
+    tag: '晴天率80%・コンパクト＆滑りやすい'
   },
 
-  // 静岡
+  // ==========================================
+  // 6. 中部・北陸 (10 resorts)
+  // ==========================================
+  {
+    id: 'takasu-snowpark',
+    name: '高鷲スノーパーク',
+    region: 'chubu_hokuriku',
+    prefecture: '岐阜県',
+    areaName: '郡上市',
+    lat: 35.9861,
+    lng: 136.8778,
+    topElevation: 1550,
+    baseElevation: 950,
+    tag: '西日本最大級・ダイナランド共通'
+  },
+  {
+    id: 'dynaland',
+    name: 'ダイナランド',
+    region: 'chubu_hokuriku',
+    prefecture: '岐阜県',
+    areaName: '郡上市',
+    lat: 35.9750,
+    lng: 136.8833,
+    topElevation: 1430,
+    baseElevation: 980,
+    tag: '毎日23時まで営業・アサダイナ'
+  },
+  {
+    id: 'washigatake',
+    name: '鷲ヶ岳スキー場',
+    region: 'chubu_hokuriku',
+    prefecture: '岐阜県',
+    areaName: '郡上市',
+    lat: 35.9417,
+    lng: 136.9083,
+    topElevation: 1400,
+    baseElevation: 910,
+    tag: '幅400mワイドバーン＆大人気パーク'
+  },
+  {
+    id: 'meiho-ski-resort',
+    name: 'めいほうスキー場',
+    region: 'chubu_hokuriku',
+    prefecture: '岐阜県',
+    areaName: '郡上市',
+    lat: 35.9181,
+    lng: 137.0306,
+    topElevation: 1600,
+    baseElevation: 900,
+    tag: '西日本最長5,000mパノラマコース'
+  },
+  {
+    id: 'winghills-shirotori',
+    name: 'ウイングヒルズ白鳥リゾート',
+    region: 'chubu_hokuriku',
+    prefecture: '岐阜県',
+    areaName: '郡上市',
+    lat: 35.9611,
+    lng: 136.7917,
+    topElevation: 1350,
+    baseElevation: 870,
+    tag: 'ゴンドラ直結・天然温泉「満天の湯」'
+  },
+  {
+    id: 'hirugano-kogen',
+    name: 'ひるがの高原スキー場',
+    region: 'chubu_hokuriku',
+    prefecture: '岐阜県',
+    areaName: '郡上市',
+    lat: 35.9972,
+    lng: 136.8972,
+    topElevation: 1040,
+    baseElevation: 880,
+    tag: 'なだらかワイド斜面・ファミリー安心'
+  },
+  {
+    id: 'skijam-katsuyama',
+    name: 'スキージャム勝山',
+    region: 'chubu_hokuriku',
+    prefecture: '福井県',
+    areaName: '勝山市',
+    lat: 36.0833,
+    lng: 136.5667,
+    topElevation: 1320,
+    baseElevation: 610,
+    tag: '西日本最大級・3エリア広大ゲレンデ'
+  },
+  {
+    id: 'tateyama-sanroku',
+    name: '立山山麓スキー場',
+    region: 'chubu_hokuriku',
+    prefecture: '富山県',
+    areaName: '富山市',
+    lat: 36.5667,
+    lng: 137.4500,
+    topElevation: 1188,
+    baseElevation: 495,
+    tag: '北アルプス立山連峰・極上雪質'
+  },
+  {
+    id: 'ichirino-onsen',
+    name: '白山一里野温泉スキー場',
+    region: 'chubu_hokuriku',
+    prefecture: '石川県',
+    areaName: '白山市',
+    lat: 36.2667,
+    lng: 136.6833,
+    topElevation: 1050,
+    baseElevation: 540,
+    tag: '石川県最大級ゲレンデ・白山麓名湯'
+  },
   {
     id: 'snow-park-yeti',
     name: 'スノーパーク イエティ',
-    region: 'shizuoka',
+    region: 'chubu_hokuriku',
     prefecture: '静岡県',
-    areaName: '裾野市 (富士山南麓)',
+    areaName: '裾野市',
     lat: 35.2978,
     lng: 138.7758,
     topElevation: 1450,
     baseElevation: 1300,
-    tag: '日本最速オープン・富士山ビュー'
+    tag: '日本最速オープン・富士山南麓ビュー'
+  },
+
+  // ==========================================
+  // 7. 西日本 (10 resorts)
+  // ==========================================
+  {
+    id: 'okuibuki',
+    name: 'グランスノー奥伊吹',
+    region: 'west_japan',
+    prefecture: '滋賀県',
+    areaName: '米原市',
+    lat: 35.4194,
+    lng: 136.3750,
+    topElevation: 1250,
+    baseElevation: 750,
+    tag: '関西最大級・世界記録級積雪の伊吹山系'
+  },
+  {
+    id: 'biwako-valley',
+    name: 'びわ湖バレイ',
+    region: 'west_japan',
+    prefecture: '滋賀県',
+    areaName: '大津市',
+    lat: 35.2139,
+    lng: 135.8889,
+    topElevation: 1174,
+    baseElevation: 780,
+    tag: '琵琶湖を見下ろす大絶景スキー場'
+  },
+  {
+    id: 'hachi-hachikita',
+    name: 'ハチ・ハチ北スキー場',
+    region: 'west_japan',
+    prefecture: '兵庫県',
+    areaName: '香美町 / 養父市',
+    lat: 35.4056,
+    lng: 134.5444,
+    topElevation: 1221,
+    baseElevation: 620,
+    tag: '関西随一の規模・鉢伏山頂連結'
+  },
+  {
+    id: 'up-kannabe',
+    name: 'アップかんなべ',
+    region: 'west_japan',
+    prefecture: '兵庫県',
+    areaName: '豊岡市',
+    lat: 35.4833,
+    lng: 134.7000,
+    topElevation: 590,
+    baseElevation: 260,
+    tag: '神鍋高原・ナイター＆雪あそび充実'
+  },
+  {
+    id: 'ojiro-ski-resort',
+    name: 'おじろスキー場',
+    region: 'west_japan',
+    prefecture: '兵庫県',
+    areaName: '香美町',
+    lat: 35.4667,
+    lng: 134.5500,
+    topElevation: 920,
+    baseElevation: 450,
+    tag: 'ゴンドラアクセス・広々ゲレンデ'
+  },
+  {
+    id: 'daisen-white-resort',
+    name: 'だいせんホワイトリゾート',
+    region: 'west_japan',
+    prefecture: '鳥取県',
+    areaName: '大山町',
+    lat: 35.3833,
+    lng: 133.5333,
+    topElevation: 1200,
+    baseElevation: 750,
+    tag: '大山と日本海を望む中国地方最高峰'
+  },
+  {
+    id: 'osorakan-snowpark',
+    name: '恐羅漢スノーパーク',
+    region: 'west_japan',
+    prefecture: '広島県',
+    areaName: '安芸太田町',
+    lat: 34.5972,
+    lng: 132.1278,
+    topElevation: 1346,
+    baseElevation: 926,
+    tag: '広島県最高峰・標高差420m天然雪100%'
+  },
+  {
+    id: 'utopia-saioto',
+    name: 'ユートピアサイオト',
+    region: 'west_japan',
+    prefecture: '広島県',
+    areaName: '北広島町',
+    lat: 34.6944,
+    lng: 132.2222,
+    topElevation: 1040,
+    baseElevation: 700,
+    tag: '人工降雪機完備・ビッグキッカー充実'
+  },
+  {
+    id: 'kuma-ski-land',
+    name: '久万スキーランド',
+    region: 'west_japan',
+    prefecture: '愛媛県',
+    areaName: '久万高原町',
+    lat: 33.6556,
+    lng: 132.9056,
+    topElevation: 1020,
+    baseElevation: 900,
+    tag: '四国屈指のゲレンデ・松山から直行'
+  },
+  {
+    id: 'gokase-highland',
+    name: '五ヶ瀬ハイランドスキー場',
+    region: 'west_japan',
+    prefecture: '宮崎県',
+    areaName: '五ヶ瀬町',
+    lat: 32.7278,
+    lng: 131.0667,
+    topElevation: 1610,
+    baseElevation: 1420,
+    tag: '日本最南端スキー場・標高1600m天然雪'
   }
 ];

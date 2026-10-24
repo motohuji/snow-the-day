@@ -153,9 +153,9 @@ export const SkiMap = ({ resortsData = [], onSelectResort }) => {
     }
 
     const map = L.map(mapContainerRef.current, {
-      center: [37.2, 138.8],
-      zoom: 6.4,
-      minZoom: 5,
+      center: [37.6, 137.5],
+      zoom: 5.6,
+      minZoom: 4,
       maxZoom: 16,
       zoomControl: true
     });

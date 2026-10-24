@@ -28,6 +28,69 @@ export const fetchResortWeather = async (resort, weights) => {
   return processWeatherData(resort, data, weights);
 };
 
+/**
+ * 全スキー場の天気を高速一括バッチ取得 (Open-Meteo Multi-location API)
+ * 最大25件ずつチャンク化して同時に取得することで、80箇所以上でも数リクエスト・1秒未満で完了
+ */
+export const fetchAllResortsWeather = async (resorts, weights) => {
+  const now = Date.now();
+  const BATCH_SIZE = 25;
+  const results = new Array(resorts.length);
+
+  // 1. キャッシュチェック
+  const uncachedResorts = [];
+  resorts.forEach((resort, idx) => {
+    const cacheKey = `weather_${resort.id}`;
+    const cached = cache.get(cacheKey);
+    if (cached && now - cached.timestamp < CACHE_TTL) {
+      results[idx] = processWeatherData(resort, cached.data, weights);
+    } else {
+      uncachedResorts.push({ resort, originalIndex: idx });
+    }
+  });
+
+  if (uncachedResorts.length === 0) {
+    return results;
+  }
+
+  // 2. 未キャッシュ分をバッチ（最大25件ずつ）に分割して一括取得
+  const chunks = [];
+  for (let i = 0; i < uncachedResorts.length; i += BATCH_SIZE) {
+    chunks.push(uncachedResorts.slice(i, i + BATCH_SIZE));
+  }
+
+  await Promise.all(
+    chunks.map(async (chunk) => {
+      const lats = chunk.map((c) => c.resort.lat).join(',');
+      const lngs = chunk.map((c) => c.resort.lng).join(',');
+      const elevations = chunk.map((c) => c.resort.topElevation).join(',');
+
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lngs}&elevation=${elevations}&hourly=temperature_2m,relative_humidity_2m,precipitation,snowfall,snow_depth,weather_code,wind_speed_10m,wind_gusts_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,snowfall_sum,wind_speed_10m_max&wind_speed_unit=ms&timezone=Asia%2FTokyo&forecast_days=7`;
+
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const dataArray = Array.isArray(data) ? data : [data];
+
+        chunk.forEach(({ resort, originalIndex }, idx) => {
+          const itemData = dataArray[idx] || generateMockWeather(resort);
+          cache.set(`weather_${resort.id}`, { timestamp: now, data: itemData });
+          results[originalIndex] = processWeatherData(resort, itemData, weights);
+        });
+      } catch (err) {
+        console.warn('Batch weather fetch failed, using fallback:', err);
+        chunk.forEach(({ resort, originalIndex }) => {
+          const mock = generateMockWeather(resort);
+          results[originalIndex] = processWeatherData(resort, mock, weights);
+        });
+      }
+    })
+  );
+
+  return results;
+};
+
 // Open-Meteo の時間別データから直近12時間の降雪量やスコアを算出
 export const processWeatherData = (resort, data, weights) => {
   const hourly = data.hourly;
