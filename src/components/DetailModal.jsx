@@ -32,10 +32,10 @@ export const DetailModal = ({ data, weights, onClose }) => {
     {
       label: 'ゲレンデ積雪深',
       icon: <Mountain className="w-3.5 h-3.5 text-indigo-400" />,
-      actual: `${current.snowDepthCm} cm`,
+      actual: `${current.snowDepthCm} cm${current.isArtificial ? ' (人工雪)' : ''}`,
       score: factors.snowDepth,
       weight: weights.snowDepth,
-      desc: 'ブッシュや小石の露出がなく下地が十分安定しているか'
+      desc: current.isArtificial ? (current.artificialNote || '人工造雪コースオープン！十分な積雪下地あり') : 'ブッシュや小石の露出がなく下地が十分安定しているか'
     },
     {
       label: '山頂気温・雪質',

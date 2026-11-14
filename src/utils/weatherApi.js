@@ -1,4 +1,5 @@
 import { calculateFactorScores, calculateTotalScore } from './scoring';
+import liveSnowReports from '../data/snow-reports.json';
 
 // キャッシュ
 const cache = new Map();
@@ -120,9 +121,24 @@ export const processWeatherData = (resort, data, weights) => {
     }
   }
 
-  // snow_depth はメートル単位なので cm に変換 (0cm の時は確実に 0)
-  const snowDepthM = hourly?.snow_depth ? (hourly.snow_depth[currentIndex] ?? 0) : 0;
-  const snowDepthCm = Math.round(snowDepthM * 100);
+  // snow_depth はメートル単位なので cm に変換
+  let snowDepthM = hourly?.snow_depth ? (hourly.snow_depth[currentIndex] ?? 0) : 0;
+  let snowDepthCm = Math.round(snowDepthM * 100);
+
+  // 早期オープン人工雪ゲレンデの実測積雪データ反映
+  const liveReport = liveSnowReports[resort.id];
+  let isArtificialActive = false;
+  let artificialNote = '';
+
+  if (liveReport && liveReport.status === 'OPEN') {
+    snowDepthCm = Math.max(snowDepthCm, liveReport.snowDepthCm || 50);
+    isArtificialActive = true;
+    artificialNote = liveReport.note || '人工雪コース滑走可能';
+  } else if (resort.isArtificial && (resort.baseArtificialDepthCm || 0) > 0) {
+    snowDepthCm = Math.max(snowDepthCm, resort.baseArtificialDepthCm);
+    isArtificialActive = true;
+    artificialNote = '人工造雪コースオープン中';
+  }
 
   const temp = Math.round((hourly?.temperature_2m?.[currentIndex] ?? -4) * 10) / 10;
   const windSpeed = Math.round((hourly?.wind_speed_10m?.[currentIndex] ?? 3) * 10) / 10;
@@ -180,7 +196,6 @@ export const processWeatherData = (resort, data, weights) => {
       const dWindMax = Math.round(daily.wind_speed_10m_max?.[idx] || 0);
       const dWeatherCode = daily.weather_code?.[idx] || 0;
 
-      // 日ごとの概算スコア
       const dFactors = calculateFactorScores({
         freshSnow12h: dSnowSum,
         snowDepthCm: snowDepthCm,
@@ -189,7 +204,10 @@ export const processWeatherData = (resort, data, weights) => {
         windGust: dWindMax,
         weatherCode: dWeatherCode
       });
-      const dResult = calculateTotalScore(dFactors, weights);
+      const dResult = calculateTotalScore(dFactors, weights, {
+        isArtificial: isArtificialActive,
+        artificialNote
+      });
 
       dailyForecast.push({
         date: `${dDate.getMonth() + 1}/${dDate.getDate()}`,
@@ -216,7 +234,10 @@ export const processWeatherData = (resort, data, weights) => {
     windGust,
     weatherCode
   });
-  const scoreResult = calculateTotalScore(factors, weights);
+  const scoreResult = calculateTotalScore(factors, weights, {
+    isArtificial: isArtificialActive,
+    artificialNote
+  });
 
   return {
     resort,
@@ -228,7 +249,9 @@ export const processWeatherData = (resort, data, weights) => {
       windGust,
       weatherCode,
       weatherInfo: factors.weatherInfo,
-      time: new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })
+      time: new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }),
+      isArtificial: isArtificialActive,
+      artificialNote
     },
     factors,
     scoreResult,

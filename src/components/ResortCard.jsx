@@ -103,6 +103,11 @@ export const ResortCard = ({ data, onSelect }) => {
               <span className="flex items-center gap-1 text-[10px]">
                 <Mountain className="w-3 h-3 text-indigo-400 flex-shrink-0" />
                 積雪深
+                {current.isArtificial && (
+                  <span className="px-1 py-0.2 rounded text-[9px] bg-sky-500/20 text-sky-300 font-bold">
+                    人工
+                  </span>
+                )}
               </span>
               <span className="font-outfit font-bold text-slate-200 text-xs sm:text-sm">
                 {current.snowDepthCm}cm

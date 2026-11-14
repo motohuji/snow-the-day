@@ -535,7 +535,9 @@ export const RESORTS = [
     lng: 138.6319,
     topElevation: 1155,
     baseElevation: 940,
-    tag: '晴天率高・アクセス抜群新幹線直結'
+    isArtificial: true,
+    baseArtificialDepthCm: 50,
+    tag: '人工造雪・11月早期オープン！晴天率高'
   },
   {
     id: 'yunomaru',
@@ -1063,7 +1065,9 @@ export const RESORTS = [
     lng: 138.7758,
     topElevation: 1450,
     baseElevation: 1300,
-    tag: '日本最速オープン・富士山南麓ビュー'
+    isArtificial: true,
+    baseArtificialDepthCm: 50,
+    tag: '日本最速10月オープン・人工造雪ICS'
   },
 
   // ==========================================

@@ -162,17 +162,34 @@ export const calculateFactorScores = ({ freshSnow12h, snowDepthCm, temp, windSpe
 
 /**
  * 総合スコアとランクの判定
+ * @param {object} factors
+ * @param {object} weights
+ * @param {object} [options] { isArtificial, artificialNote }
  */
-export const calculateTotalScore = (factors, weights) => {
-  const totalWeight = weights.freshSnow + weights.snowDepth + weights.temperature + weights.wind + weights.weather;
+export const calculateTotalScore = (factors, weights, options = {}) => {
+  const isArtificial = !!options.isArtificial;
+  
+  // 人工雪ゲレンデの場合の重み付け補正（新雪依存を減らし、締まった圧雪バーン・晴天・気温・風を重視）
+  let effectiveWeights = { ...weights };
+  if (isArtificial) {
+    effectiveWeights = {
+      freshSnow: Math.min(weights.freshSnow, 10),
+      snowDepth: Math.max(weights.snowDepth, 25),
+      temperature: Math.max(weights.temperature, 25),
+      wind: Math.max(weights.wind, 20),
+      weather: Math.max(weights.weather, 20)
+    };
+  }
+
+  const totalWeight = effectiveWeights.freshSnow + effectiveWeights.snowDepth + effectiveWeights.temperature + effectiveWeights.wind + effectiveWeights.weather;
   const normWeight = (w) => (w / (totalWeight || 100));
 
   let rawScore =
-    factors.freshSnow * normWeight(weights.freshSnow) +
-    factors.snowDepth * normWeight(weights.snowDepth) +
-    factors.temperature * normWeight(weights.temperature) +
-    factors.wind * normWeight(weights.wind) +
-    factors.weather * normWeight(weights.weather);
+    factors.freshSnow * normWeight(effectiveWeights.freshSnow) +
+    factors.snowDepth * normWeight(effectiveWeights.snowDepth) +
+    factors.temperature * normWeight(effectiveWeights.temperature) +
+    factors.wind * normWeight(effectiveWeights.wind) +
+    factors.weather * normWeight(effectiveWeights.weather);
 
   // 積雪不足・積雪ゼロ時のハードキャップ
   // 積雪深が15cm未満の場合は滑走不可（オフシーズン／雪待ち）
@@ -208,6 +225,17 @@ export const calculateTotalScore = (factors, weights) => {
       bgLight: 'rgba(148, 163, 184, 0.15)',
       border: 'border-slate-500/30',
       comment: '現在ゲレンデに積雪がありません（積雪0cm）。本格的な降雪・シーズンインをお待ちください。'
+    };
+  } else if (isArtificial) {
+    // 人工雪ゲレンデ専用の特別バッジ
+    badge = {
+      rank: finalScore >= 75 ? 'OPEN' : 'OPEN',
+      level: 'ARTIFICIAL',
+      title: '人工雪オープン中！',
+      color: '#0284c7', // sky-600
+      bgLight: 'rgba(2, 132, 199, 0.15)',
+      border: 'border-sky-500/40',
+      comment: options.artificialNote || '人工造雪コースオープン！締まった圧雪バーンで初滑り可能。'
     };
   } else if (finalScore >= 90) {
     badge = {
