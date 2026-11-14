@@ -10,10 +10,7 @@ import {
   Cloud,
   Clock,
   Calendar,
-  Layers,
-  Info,
-  ExternalLink,
-  ChevronDown
+  Layers
 } from 'lucide-react';
 
 export const DetailModal = ({ data, weights, onClose }) => {
@@ -23,11 +20,10 @@ export const DetailModal = ({ data, weights, onClose }) => {
   const { resort, current, scoreResult, next24Hours, dailyForecast } = data;
   const { score, badge, factors } = scoreResult;
 
-  // 各指標の割合計算
   const factorRows = [
     {
       label: '12h新雪量',
-      icon: <Snowflake className="w-4 h-4 text-cyan-400" />,
+      icon: <Snowflake className="w-3.5 h-3.5 text-cyan-400" />,
       actual: `${current.freshSnow12h} cm`,
       score: factors.freshSnow,
       weight: weights.freshSnow,
@@ -35,7 +31,7 @@ export const DetailModal = ({ data, weights, onClose }) => {
     },
     {
       label: 'ゲレンデ積雪深',
-      icon: <Mountain className="w-4 h-4 text-indigo-400" />,
+      icon: <Mountain className="w-3.5 h-3.5 text-indigo-400" />,
       actual: `${current.snowDepthCm} cm`,
       score: factors.snowDepth,
       weight: weights.snowDepth,
@@ -43,23 +39,23 @@ export const DetailModal = ({ data, weights, onClose }) => {
     },
     {
       label: '山頂気温・雪質',
-      icon: <Thermometer className="w-4 h-4 text-rose-400" />,
+      icon: <Thermometer className="w-3.5 h-3.5 text-rose-400" />,
       actual: `${current.temp} ℃`,
       score: factors.temperature,
       weight: weights.temperature,
       desc: '-10℃〜-3℃のドライパウダー帯が最高得点'
     },
     {
-      label: '風速・突風 (リフト安全度)',
-      icon: <Wind className="w-4 h-4 text-sky-400" />,
-      actual: `${current.windSpeed} m/s (最大 ${current.windGust}m/s)`,
+      label: '風速 (リフト運行)',
+      icon: <Wind className="w-3.5 h-3.5 text-sky-400" />,
+      actual: `${current.windSpeed} m/s`,
       score: factors.wind,
       weight: weights.wind,
       desc: '風が穏やかなほど高得点。突風15m/s以上は運休リスク大減点'
     },
     {
       label: '天候・視界',
-      icon: <Cloud className="w-4 h-4 text-slate-300" />,
+      icon: <Cloud className="w-3.5 h-3.5 text-slate-300" />,
       actual: `${current.weatherInfo.label}`,
       score: factors.weather,
       weight: weights.weather,
@@ -68,147 +64,155 @@ export const DetailModal = ({ data, weights, onClose }) => {
   ];
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-3 sm:p-5 bg-slate-900/60 backdrop-blur-sm overflow-y-auto animate-fade-in">
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm p-0 sm:p-4 overflow-y-auto"
+      onClick={onClose}
+    >
       <div
-        className="relative w-full max-w-2xl bg-white border border-slate-200 rounded-3xl shadow-2xl overflow-hidden my-auto"
+        className="relative w-full max-w-2xl bg-slate-900 border-t sm:border border-slate-700/80 rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col animate-slide-up pb-safe"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 背景アクセント */}
         <div
-          className="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl pointer-events-none opacity-20"
+          className="absolute top-0 right-0 w-60 h-60 rounded-full blur-3xl pointer-events-none opacity-15"
           style={{ backgroundColor: badge.color }}
         />
 
+        {/* ボトムシートドラッグハンドル (スマホのみ) */}
+        <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto my-2.5 sm:hidden flex-shrink-0" />
+
         {/* ヘッダー */}
-        <div className="relative p-6 pb-4 border-b border-slate-100 flex items-start justify-between">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200">
+        <div className="relative p-4 sm:p-5 border-b border-slate-800 flex items-start justify-between flex-shrink-0">
+          <div className="min-w-0 pr-3">
+            <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-sky-400 border border-sky-400/20">
                 {resort.prefecture}
               </span>
-              <span className="text-xs text-slate-500">{resort.areaName}</span>
-              <span className="text-xs text-slate-300">•</span>
-              <span className="text-xs text-sky-600 font-medium">#{resort.tag}</span>
+              <span className="text-xs text-slate-400 truncate">{resort.areaName}</span>
+              <span className="text-slate-600 hidden xs:inline">•</span>
+              <span className="text-xs text-sky-400 font-medium hidden xs:inline">#{resort.tag}</span>
             </div>
-            <h2 className="text-2xl font-black text-slate-900">{resort.name}</h2>
-            <p className="text-xs text-slate-500 mt-1">
-              山頂 {resort.topElevation}m / 山麓 {resort.baseElevation}m (標高差 {resort.topElevation - resort.baseElevation}m)
+            <h2 className="text-lg sm:text-2xl font-black text-white leading-tight truncate">
+              {resort.name}
+            </h2>
+            <p className="text-[10px] sm:text-xs text-slate-400 mt-0.5">
+              標高 {resort.baseElevation}m〜{resort.topElevation}m (標高差 {resort.topElevation - resort.baseElevation}m)
             </p>
           </div>
 
           <button
             onClick={onClose}
-            className="p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition-colors"
+            className="p-2 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors flex-shrink-0"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
 
         {/* スコアハイライトエリア */}
-        <div className="p-6 bg-gradient-to-b from-sky-50/50 to-white border-b border-slate-100">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-5">
-              <ScoreGauge score={score} size={130} strokeWidth={11} badge={badge} />
-              <div>
-                <span
-                  className="px-3 py-1 rounded-md text-xs font-black uppercase tracking-wider border shadow-sm inline-block mb-1.5"
-                  style={{
-                    backgroundColor: badge.bgLight,
-                    color: badge.color,
-                    borderColor: badge.color + '50'
-                  }}
-                >
-                  {badge.level} • RANK {badge.rank}
-                </span>
-                <div className="text-xl font-black text-slate-900">{badge.title}</div>
-                <p className="text-xs text-slate-600 mt-1 leading-relaxed max-w-sm">
-                  {badge.comment}
-                </p>
-              </div>
+        <div className="p-4 sm:p-5 bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 border-b border-slate-800 flex items-center justify-between gap-3 sm:gap-6 flex-shrink-0">
+          <div className="flex items-center gap-3 sm:gap-5 min-w-0">
+            <ScoreGauge
+              score={score}
+              size={window.innerWidth < 640 ? 84 : 105}
+              strokeWidth={window.innerWidth < 640 ? 8 : 10}
+              badge={badge}
+            />
+            <div className="min-w-0">
+              <span
+                className="px-2 py-0.5 rounded text-[10px] sm:text-xs font-black uppercase tracking-wider border inline-block mb-1"
+                style={{
+                  backgroundColor: badge.bgLight,
+                  color: badge.color,
+                  borderColor: badge.color + '50'
+                }}
+              >
+                {badge.level} • RANK {badge.rank}
+              </span>
+              <div className="text-sm sm:text-lg font-bold text-white truncate">{badge.title}</div>
+              <p className="text-[11px] text-slate-300 mt-0.5 line-clamp-2 leading-tight">
+                {badge.comment}
+              </p>
             </div>
+          </div>
 
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 text-center min-w-[140px] shadow-sm">
-              <div className="text-xs font-semibold text-slate-500 mb-1">現在の天気</div>
-              <WeatherIcon name={current.weatherInfo.icon} className="w-10 h-10 mx-auto my-1" />
-              <div className="text-sm font-bold text-slate-800">{current.weatherInfo.label}</div>
-              <div className="text-xs text-sky-700 font-bold mt-0.5">{current.temp}℃</div>
-            </div>
+          <div className="text-center p-2 sm:p-3 rounded-xl bg-slate-800/70 border border-slate-700 flex-shrink-0 min-w-[72px] sm:min-w-[90px]">
+            <WeatherIcon name={current.weatherInfo.icon} className="w-6 h-6 sm:w-8 sm:h-8 mx-auto" />
+            <div className="text-[10px] sm:text-xs font-bold text-white mt-0.5">{current.weatherInfo.label}</div>
+            <div className="text-[10px] text-sky-300 font-outfit">{current.temp}℃</div>
           </div>
         </div>
 
         {/* タブセレクター */}
-        <div className="flex border-b border-slate-200 bg-slate-50 px-6">
+        <div className="flex border-b border-slate-800 bg-slate-950/80 px-2 sm:px-6 flex-shrink-0">
           <button
             onClick={() => setActiveTab('hourly')}
-            className={`py-3 px-4 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 border-b-2 transition-colors ${
+            className={`flex-1 py-2.5 sm:py-3 text-center text-xs font-bold transition-colors border-b-2 flex items-center justify-center gap-1 ${
               activeTab === 'hourly'
-                ? 'border-sky-500 text-sky-600'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-sky-400 text-sky-400'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Clock className="w-4 h-4" />
-            24時間推移
+            <Clock className="w-3.5 h-3.5" />
+            <span>24時間推移</span>
           </button>
           <button
             onClick={() => setActiveTab('daily')}
-            className={`py-3 px-4 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 border-b-2 transition-colors ${
+            className={`flex-1 py-2.5 sm:py-3 text-center text-xs font-bold transition-colors border-b-2 flex items-center justify-center gap-1 ${
               activeTab === 'daily'
-                ? 'border-sky-500 text-sky-600'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-sky-400 text-sky-400'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Calendar className="w-4 h-4" />
-            週間7日予報
+            <Calendar className="w-3.5 h-3.5" />
+            <span>週間7日予報</span>
           </button>
           <button
             onClick={() => setActiveTab('factors')}
-            className={`py-3 px-4 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 border-b-2 transition-colors ${
+            className={`flex-1 py-2.5 sm:py-3 text-center text-xs font-bold transition-colors border-b-2 flex items-center justify-center gap-1 ${
               activeTab === 'factors'
-                ? 'border-sky-500 text-sky-600'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-sky-400 text-sky-400'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Layers className="w-4 h-4" />
-            スコア詳細内訳
+            <Layers className="w-3.5 h-3.5" />
+            <span>スコア内訳</span>
           </button>
         </div>
 
         {/* タブコンテンツ */}
-        <div className="p-6 max-h-[380px] overflow-y-auto">
+        <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4">
           {/* 1. 24時間推移 */}
           {activeTab === 'hourly' && (
             <div>
-              <div className="text-xs text-slate-500 mb-3 flex items-center justify-between">
-                <span>直近24時間の時間帯別コンディション＆スコア予測</span>
-                <span className="text-[11px] text-sky-600 font-bold">横スクロール可能 →</span>
+              <div className="text-[11px] text-slate-400 mb-2.5 flex items-center justify-between">
+                <span>時間帯別のコンディション予測</span>
+                <span className="text-[10px] text-sky-400">横スワイプ可能 →</span>
               </div>
-              <div className="overflow-x-auto pb-2">
+              <div className="overflow-x-auto pb-2 scrollbar-none -mx-1 px-1">
                 <div className="flex gap-2 min-w-max">
                   {next24Hours.map((h, i) => (
                     <div
                       key={i}
-                      className={`flex flex-col items-center justify-between p-3 rounded-2xl border min-w-[76px] text-center transition-all ${
+                      className={`flex flex-col items-center justify-between p-2.5 rounded-xl border min-w-[64px] sm:min-w-[72px] text-center transition-all ${
                         i === 0
-                          ? 'bg-sky-50 border-sky-300 shadow-sm'
-                          : 'bg-white border-slate-200 shadow-sm hover:border-slate-300'
+                          ? 'bg-sky-950/40 border-sky-400/60 shadow-md'
+                          : 'bg-slate-800/40 border-slate-800 hover:border-slate-700'
                       }`}
                     >
-                      <div className="text-xs font-semibold text-slate-500">
+                      <div className="text-[11px] font-semibold text-slate-400">
                         {h.time}
                       </div>
-                      <WeatherIcon name={h.weatherInfo.icon} className="w-6 h-6 my-2" />
-                      <div className="text-sm font-bold text-slate-900 mb-0.5">
+                      <div className="my-1">
+                        <WeatherIcon name={h.weatherInfo.icon} className="w-5 h-5 sm:w-6 sm:h-6" />
+                      </div>
+                      <div className="text-xs font-bold text-white font-outfit">
                         {h.temp}℃
                       </div>
-                      <div className="text-[10px] text-sky-600 font-bold mb-2">
+                      <div className="text-[10px] text-cyan-300 font-medium font-outfit mt-0.5">
                         {h.snowfall > 0 ? `+${h.snowfall}cm` : '-'}
                       </div>
-                      <div className="text-[10px] text-slate-500 mb-2">
-                        {h.windSpeed}m/s
-                      </div>
-                      {/* ミニスコアバッジ */}
                       <div
-                        className="w-full py-1 rounded-lg text-xs font-outfit font-black"
+                        className="w-full py-0.5 rounded-md text-[10px] font-outfit font-black mt-1.5"
                         style={{
                           backgroundColor: h.badge.bgLight,
                           color: h.badge.color
@@ -225,53 +229,53 @@ export const DetailModal = ({ data, weights, onClose }) => {
 
           {/* 2. 週間7日予報 */}
           {activeTab === 'daily' && (
-            <div className="space-y-2">
-              <div className="text-xs text-slate-500 mb-3">
-                今後7日間の日別スノースコア予測（積雪量と天候変化）
+            <div className="space-y-1.5">
+              <div className="text-[11px] text-slate-400 mb-1">
+                今後7日間の日別スノースコア予測
               </div>
               {dailyForecast.map((d, i) => (
                 <div
                   key={i}
-                  className={`flex items-center justify-between p-3 rounded-xl border transition-colors ${
+                  className={`flex items-center justify-between p-2.5 rounded-xl border transition-colors text-xs gap-2 ${
                     d.isToday
-                      ? 'bg-sky-50/80 border-sky-300 shadow-sm'
-                      : 'bg-white border-slate-200 shadow-sm hover:bg-slate-50'
+                      ? 'bg-sky-950/30 border-sky-500/40'
+                      : 'bg-slate-800/30 border-slate-800/80 hover:bg-slate-800/50'
                   }`}
                 >
-                  <div className="flex items-center gap-3 min-w-[90px]">
-                    <span className="font-outfit font-bold text-sm text-slate-900">
+                  <div className="flex items-center gap-1.5 min-w-[78px]">
+                    <span className="font-outfit font-bold text-white">
                       {d.date}
                     </span>
                     <span
-                      className={`text-xs font-bold px-1.5 py-0.5 rounded ${
+                      className={`text-[10px] font-bold ${
                         d.dayName === '日'
-                          ? 'text-rose-600 bg-rose-50'
+                          ? 'text-rose-400'
                           : d.dayName === '土'
-                          ? 'text-sky-600 bg-sky-50'
-                          : 'text-slate-500'
+                          ? 'text-sky-400'
+                          : 'text-slate-400'
                       }`}
                     >
                       ({d.dayName})
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-2 min-w-[120px]">
-                    <WeatherIcon name={d.weatherInfo.icon} className="w-5 h-5" />
-                    <span className="text-xs text-slate-700 font-medium">{d.weatherInfo.label}</span>
+                  <div className="flex items-center gap-1 min-w-[90px]">
+                    <WeatherIcon name={d.weatherInfo.icon} className="w-4 h-4 flex-shrink-0" />
+                    <span className="text-[11px] text-slate-300 truncate">{d.weatherInfo.label}</span>
                   </div>
 
-                  <div className="text-xs text-right min-w-[70px]">
-                    <span className="text-rose-600 font-bold">{d.tempMax}℃</span>
-                    <span className="text-slate-400 mx-1">/</span>
-                    <span className="text-sky-600 font-bold">{d.tempMin}℃</span>
+                  <div className="text-slate-300 text-[11px] font-outfit text-right min-w-[65px]">
+                    <span className="text-rose-300">{d.tempMax}℃</span>
+                    <span className="text-slate-500 mx-0.5">/</span>
+                    <span className="text-sky-300">{d.tempMin}℃</span>
                   </div>
 
-                  <div className="text-xs text-sky-700 font-bold min-w-[60px] text-right">
-                    {d.snowfallSum > 0 ? `降雪 ${d.snowfallSum}cm` : '降雪なし'}
+                  <div className="text-xs text-cyan-300 font-bold font-outfit text-right min-w-[45px]">
+                    {d.snowfallSum > 0 ? `+${d.snowfallSum}cm` : '-'}
                   </div>
 
                   <div
-                    className="px-2.5 py-1 rounded-lg text-xs font-outfit font-black min-w-[48px] text-center"
+                    className="px-2 py-0.5 rounded-lg text-xs font-outfit font-black min-w-[38px] text-center"
                     style={{
                       backgroundColor: d.badge.bgLight,
                       color: d.badge.color
@@ -286,40 +290,36 @@ export const DetailModal = ({ data, weights, onClose }) => {
 
           {/* 3. スコア詳細内訳 */}
           {activeTab === 'factors' && (
-            <div className="space-y-4">
-              <div className="text-xs text-slate-500">
-                現在の重み付け配分に基づく5大指標の個別得点と評価理由
+            <div className="space-y-2.5">
+              <div className="text-[11px] text-slate-400 mb-1">
+                現在の重み付け配分に基づく5大指標の個別得点
               </div>
               {factorRows.map((f, i) => (
-                <div key={i} className="p-3.5 bg-white border border-slate-200 rounded-xl shadow-sm">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className="flex items-center gap-2">
+                <div key={i} className="p-2.5 bg-slate-800/40 border border-slate-800 rounded-xl space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-1.5">
                       {f.icon}
-                      <span className="text-sm font-bold text-slate-800">{f.label}</span>
-                      <span className="text-xs px-2 py-0.5 rounded bg-sky-50 text-sky-700 font-semibold border border-sky-200">
-                        重み: {f.weight}%
-                      </span>
+                      <span className="font-bold text-white text-xs">{f.label}</span>
+                      <span className="text-[10px] text-sky-400">({f.weight}%)</span>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs text-slate-500 font-mono">{f.actual}</span>
-                      <span className="font-outfit font-black text-sm text-slate-900">
-                        {f.score} <span className="text-[10px] text-slate-400 font-normal">/ 100</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] text-slate-400 font-mono">{f.actual}</span>
+                      <span className="font-outfit font-black text-xs text-white">
+                        {f.score}点
                       </span>
                     </div>
                   </div>
 
-                  {/* プログレスバー */}
-                  <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-1.5 border border-slate-200/50">
+                  <div className="w-full bg-slate-700/40 h-1.5 rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-500"
                       style={{
                         width: `${f.score}%`,
                         backgroundColor:
-                          f.score >= 80 ? '#0284c7' : f.score >= 60 ? '#10b981' : f.score >= 40 ? '#f59e0b' : '#ef4444'
+                          f.score >= 80 ? '#38bdf8' : f.score >= 60 ? '#10b981' : f.score >= 40 ? '#f59e0b' : '#ef4444'
                       }}
                     />
                   </div>
-                  <div className="text-[11px] text-slate-500">{f.desc}</div>
                 </div>
               ))}
             </div>
@@ -327,13 +327,13 @@ export const DetailModal = ({ data, weights, onClose }) => {
         </div>
 
         {/* フッター */}
-        <div className="p-4 px-6 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
-          <span className="text-[11px] text-slate-400">
-            データ元: Open-Meteo 高度補正気象API (山頂標高基準)
+        <div className="p-3 sm:p-4 bg-slate-950 border-t border-slate-800 flex items-center justify-between flex-shrink-0">
+          <span className="text-[10px] text-slate-500">
+            Open-Meteo 高度補正気象API (山頂基準)
           </span>
           <button
             onClick={onClose}
-            className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold transition-colors shadow-sm"
+            className="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition-colors"
           >
             閉じる
           </button>

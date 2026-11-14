@@ -12,29 +12,29 @@ export const ResortCard = ({ data, onSelect }) => {
   return (
     <div
       onClick={() => onSelect(data)}
-      className="group relative bg-white hover:bg-slate-50/90 border border-slate-200/90 hover:border-sky-400 rounded-2xl p-5 cursor-pointer transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-sky-500/10 hover:-translate-y-1 flex flex-col justify-between overflow-hidden"
+      className="group relative bg-slate-900/90 active:bg-slate-850 hover:bg-slate-850 border border-slate-800 hover:border-sky-500/50 rounded-2xl p-4 sm:p-5 cursor-pointer transition-all duration-200 shadow-lg active:scale-[0.99] flex flex-col justify-between overflow-hidden"
     >
       {/* 背景のほのかなグロー効果 */}
       <div
-        className="absolute -right-16 -top-16 w-40 h-40 rounded-full blur-3xl pointer-events-none opacity-10 transition-opacity group-hover:opacity-20"
+        className="absolute -right-16 -top-16 w-36 h-36 rounded-full blur-3xl pointer-events-none opacity-15 transition-opacity group-hover:opacity-25"
         style={{ backgroundColor: badge.color }}
       />
 
       <div>
         {/* ヘッダー: 都道府県・地域・タグ */}
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200/60">
+        <div className="flex items-center justify-between gap-2 mb-1.5">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-sky-400 border border-sky-400/20 flex-shrink-0">
               {resort.prefecture}
             </span>
-            <span className="text-xs text-slate-500 font-medium">
+            <span className="text-xs text-slate-400 truncate">
               {resort.areaName}
             </span>
           </div>
 
           {/* ゴルフTha Day風のバッジ */}
           <span
-            className="px-2.5 py-0.5 rounded-md text-[11px] font-black uppercase tracking-wider border shadow-sm"
+            className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider border flex-shrink-0 shadow-sm"
             style={{
               backgroundColor: badge.bgLight,
               color: badge.color,
@@ -46,94 +46,105 @@ export const ResortCard = ({ data, onSelect }) => {
         </div>
 
         {/* スキー場名 */}
-        <h3 className="text-lg font-bold text-slate-900 group-hover:text-sky-600 transition-colors line-clamp-1 mb-1">
+        <h3 className="text-base sm:text-lg font-bold text-white group-hover:text-sky-300 transition-colors line-clamp-1 mb-0.5">
           {resort.name}
         </h3>
-        <p className="text-xs text-slate-500 mb-4 flex items-center gap-2">
-          <span className="text-sky-600 font-medium">#{resort.tag}</span>
-          <span className="text-slate-300">•</span>
+        <p className="text-[11px] text-slate-400 mb-3 truncate flex items-center gap-1.5">
+          <span className="text-sky-400 font-medium">#{resort.tag}</span>
+          <span className="text-slate-600">•</span>
           <span>標高 {resort.baseElevation}m - {resort.topElevation}m</span>
         </p>
 
         {/* メインセクション: 円形ゲージ + 天気 + 概要 */}
-        <div className="flex items-center justify-between gap-4 py-2 border-y border-slate-100 mb-4">
+        <div className="flex items-center justify-between py-2 border-y border-slate-800/80 mb-3">
           <div className="flex items-center gap-3">
-            <ScoreGauge score={score} size={84} strokeWidth={8} badge={badge} />
-            <div className="space-y-0.5">
-              <div className="text-sm font-bold text-slate-800 leading-snug">
+            <ScoreGauge score={score} size={74} strokeWidth={7} badge={badge} />
+            <div>
+              <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                Condition
+              </div>
+              <div className="text-xs sm:text-sm font-bold text-white mt-0.5" style={{ color: badge.color }}>
                 {badge.title}
               </div>
-              <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                <WeatherIcon type={current.weatherInfo.type} className="w-4 h-4 text-sky-500" />
-                <span>{current.weatherInfo.label}</span>
+              <div className="text-[10px] text-slate-400 line-clamp-2 max-w-[130px] sm:max-w-[160px] mt-0.5 leading-tight">
+                {badge.comment}
               </div>
             </div>
           </div>
 
-          <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-sky-500 group-hover:translate-x-1 transition-all flex-shrink-0" />
+          <div className="text-right flex flex-col items-end justify-center pl-2 flex-shrink-0">
+            <div className="p-1.5 bg-slate-800/70 rounded-xl border border-slate-700/50 mb-0.5">
+              <WeatherIcon name={current.weatherInfo.icon} className="w-6 h-6" />
+            </div>
+            <span className="text-[11px] font-medium text-slate-300 whitespace-nowrap">
+              {current.weatherInfo.label}
+            </span>
+          </div>
         </div>
 
-        {/* コメント */}
-        <p className="text-xs text-slate-600 leading-relaxed line-clamp-2 mb-4 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-          {badge.comment}
-        </p>
-      </div>
-
-      {/* ボトムメトリクス 4分割グリッド */}
-      <div className="space-y-2">
-        <div className="grid grid-cols-2 gap-2 text-xs">
-          {/* 12h新雪量 */}
-          <div className="flex items-center gap-2 bg-slate-50/80 p-2.5 rounded-xl border border-slate-100">
-            <Snowflake className="w-4 h-4 text-sky-500 flex-shrink-0" />
-            <div className="min-w-0">
-              <span className="text-[10px] text-slate-500 block">12h新雪</span>
-              <span className="font-bold text-slate-900 font-outfit">
-                +{current.freshSnow12h} <span className="text-[10px] font-normal text-slate-500">cm</span>
+        {/* 4大パラメータグリッド (スマホで2x2) */}
+        <div className="grid grid-cols-2 gap-1.5 sm:gap-2 text-xs">
+          {/* 12時間降雪 */}
+          <div className="p-2 rounded-xl bg-slate-800/50 border border-slate-800">
+            <div className="flex items-center justify-between text-slate-400">
+              <span className="flex items-center gap-1 text-[10px]">
+                <Snowflake className="w-3 h-3 text-cyan-400 flex-shrink-0" />
+                12h新雪
+              </span>
+              <span className="font-outfit font-bold text-cyan-300 text-xs sm:text-sm">
+                {current.freshSnow12h > 0 ? `+${current.freshSnow12h}cm` : '0cm'}
               </span>
             </div>
           </div>
 
           {/* 積雪深 */}
-          <div className="flex items-center gap-2 bg-slate-50/80 p-2.5 rounded-xl border border-slate-100">
-            <Mountain className="w-4 h-4 text-indigo-500 flex-shrink-0" />
-            <div className="min-w-0">
-              <span className="text-[10px] text-slate-500 block">積雪深</span>
-              <span className="font-bold text-slate-900 font-outfit">
-                {current.snowDepthCm} <span className="text-[10px] font-normal text-slate-500">cm</span>
+          <div className={`p-2 rounded-xl border ${current.snowDepthCm <= 0 ? 'bg-slate-900 border-slate-800 text-slate-500' : 'bg-slate-800/50 border-slate-800'}`}>
+            <div className="flex items-center justify-between text-slate-400">
+              <span className="flex items-center gap-1 text-[10px]">
+                <Mountain className="w-3 h-3 text-indigo-400 flex-shrink-0" />
+                積雪深
+              </span>
+              <span className="font-outfit font-bold text-slate-200 text-xs sm:text-sm">
+                {current.snowDepthCm}cm
               </span>
             </div>
           </div>
 
           {/* 山頂気温 */}
-          <div className="flex items-center gap-2 bg-slate-50/80 p-2.5 rounded-xl border border-slate-100">
-            <Thermometer className="w-4 h-4 text-rose-500 flex-shrink-0" />
-            <div className="min-w-0">
-              <span className="text-[10px] text-slate-500 block">山頂気温</span>
-              <span className="font-bold text-slate-900 font-outfit">
-                {current.temp} <span className="text-[10px] font-normal text-slate-500">℃</span>
+          <div className="p-2 rounded-xl bg-slate-800/50 border border-slate-800">
+            <div className="flex items-center justify-between text-slate-400">
+              <span className="flex items-center gap-1 text-[10px]">
+                <Thermometer className="w-3 h-3 text-rose-400 flex-shrink-0" />
+                山頂気温
+              </span>
+              <span className="font-outfit font-bold text-slate-200 text-xs sm:text-sm">
+                {current.temp > 0 ? `+${current.temp}` : current.temp}℃
               </span>
             </div>
           </div>
 
-          {/* 風速 */}
-          <div className="flex items-center gap-2 bg-slate-50/80 p-2.5 rounded-xl border border-slate-100">
-            <Wind className="w-4 h-4 text-sky-500 flex-shrink-0" />
-            <div className="min-w-0">
-              <span className="text-[10px] text-slate-500 block">風速</span>
-              <span className="font-bold text-slate-900 font-outfit">
-                {current.windSpeed} <span className="text-[10px] font-normal text-slate-500">m/s</span>
+          {/* 山頂風速 */}
+          <div className={`p-2 rounded-xl border ${isLiftRisk ? 'bg-rose-950/30 border-rose-500/40' : 'bg-slate-800/50 border-slate-800'}`}>
+            <div className="flex items-center justify-between text-slate-400">
+              <span className="flex items-center gap-1 text-[10px]">
+                <Wind className="w-3 h-3 text-sky-400 flex-shrink-0" />
+                風速
+              </span>
+              <span className={`font-outfit font-bold text-xs sm:text-sm ${isLiftRisk ? 'text-rose-400' : 'text-slate-200'}`}>
+                {current.windSpeed}m/s
               </span>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* リフト運休リスク警告 */}
-        {isLiftRisk && (
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-semibold">
-            <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 text-amber-600" />
-            <span className="truncate">突風 {current.windGust}m/s: リフト運休の可能性あり</span>
-          </div>
-        )}
+      {/* フッター: 詳細リンク */}
+      <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-xs text-sky-400 font-semibold group-hover:text-sky-300 transition-colors">
+        <span className="text-[11px] text-slate-400">詳細・週間予報</span>
+        <div className="flex items-center gap-1">
+          <span>詳細を見る</span>
+          <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+        </div>
       </div>
     </div>
   );
