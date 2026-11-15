@@ -123,7 +123,8 @@ export const processWeatherData = (resort, data, weights) => {
 
   // snow_depth はメートル単位なので cm に変換
   let snowDepthM = hourly?.snow_depth ? (hourly.snow_depth[currentIndex] ?? 0) : 0;
-  let snowDepthCm = Math.round(snowDepthM * 100);
+  const openMeteoSnowDepthCm = Math.round(snowDepthM * 100);
+  let snowDepthCm = openMeteoSnowDepthCm;
 
   // 早期オープン人工雪ゲレンデの実測積雪データ反映
   const liveReport = liveSnowReports[resort.id];
@@ -244,6 +245,7 @@ export const processWeatherData = (resort, data, weights) => {
     current: {
       freshSnow12h: Math.round(freshSnow12h * 10) / 10,
       snowDepthCm,
+      openMeteoSnowDepthCm,
       temp,
       windSpeed,
       windGust,

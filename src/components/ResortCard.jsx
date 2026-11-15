@@ -105,13 +105,20 @@ export const ResortCard = ({ data, onSelect }) => {
                 積雪深
                 {current.isArtificial && (
                   <span className="px-1 py-0.2 rounded text-[9px] bg-sky-500/20 text-sky-300 font-bold">
-                    人工
+                    公式
                   </span>
                 )}
               </span>
-              <span className="font-outfit font-bold text-slate-200 text-xs sm:text-sm">
-                {current.snowDepthCm}cm
-              </span>
+              <div className="text-right">
+                <span className="font-outfit font-bold text-slate-200 text-xs sm:text-sm">
+                  {current.snowDepthCm}cm
+                </span>
+                {current.isArtificial && (
+                  <span className="block text-[9px] text-slate-400 font-normal leading-none mt-0.5">
+                    気象:{current.openMeteoSnowDepthCm ?? 0}cm
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 

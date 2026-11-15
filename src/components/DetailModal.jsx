@@ -32,10 +32,14 @@ export const DetailModal = ({ data, weights, onClose }) => {
     {
       label: 'ゲレンデ積雪深',
       icon: <Mountain className="w-3.5 h-3.5 text-indigo-400" />,
-      actual: `${current.snowDepthCm} cm${current.isArtificial ? ' (人工雪)' : ''}`,
+      actual: current.isArtificial
+        ? `${current.snowDepthCm} cm (公式・人工) / 気象:${current.openMeteoSnowDepthCm ?? 0} cm`
+        : `${current.snowDepthCm} cm`,
       score: factors.snowDepth,
       weight: weights.snowDepth,
-      desc: current.isArtificial ? (current.artificialNote || '人工造雪コースオープン！十分な積雪下地あり') : 'ブッシュや小石の露出がなく下地が十分安定しているか'
+      desc: current.isArtificial
+        ? `公式発表/実測の積雪深(${current.snowDepthCm}cm)でスコア算出中。参考として気象モデル(Open-Meteo)の自然積雪量は ${current.openMeteoSnowDepthCm ?? 0}cm です。`
+        : 'ブッシュや小石の露出がなく下地が十分安定しているか'
     },
     {
       label: '山頂気温・雪質',
