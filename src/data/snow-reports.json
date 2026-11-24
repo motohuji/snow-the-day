@@ -1,20 +1,20 @@
 {
   "_meta": {
-    "lastUpdated": "2026-11-23T21:38:49.159Z",
+    "lastUpdated": "2026-11-24T21:38:29.699Z",
     "source": "Official Sites & SURF&SNOW"
   },
   "snow-park-yeti": {
     "status": "OPEN",
-    "snowDepthCm": 65,
+    "snowDepthCm": 75,
     "snowType": "人工雪",
     "note": "日本最速オープン！人工造雪ICSコース滑走可能",
-    "updatedAt": "2026-11-23T21:38:48.989Z"
+    "updatedAt": "2026-11-24T21:38:29.526Z"
   },
   "karuizawa-prince": {
     "status": "OPEN",
     "snowDepthCm": 50,
     "snowType": "人工雪",
     "note": "人工造雪・降雪機フル稼働コース滑走可能",
-    "updatedAt": "2026-11-23T21:38:49.159Z"
+    "updatedAt": "2026-11-24T21:38:29.698Z"
   }
 }
